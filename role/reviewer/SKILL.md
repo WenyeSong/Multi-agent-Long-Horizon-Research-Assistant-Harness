@@ -1,5 +1,5 @@
 ---
-name: "openclaw-reviewer"
+name: "reviewer"
 description: "Review OpenClaw planner, literature, and executor artifacts before PDF generation using LLM-led judgment plus lightweight evidence scripts."
 ---
 
