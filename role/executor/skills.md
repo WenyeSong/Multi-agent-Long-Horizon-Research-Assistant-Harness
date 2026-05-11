@@ -2,6 +2,8 @@
 
 - Mathematical modeling support
 - Algorithm design within planner-provided scope
+- LLM-assisted bounded execution planning
+- LLM-assisted experiment code generation
 - Experiment design
 - Numerical experiment execution
 - Reproducibility checks

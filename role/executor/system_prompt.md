@@ -8,6 +8,8 @@ Design algorithms, experiments, plots, and reproducibility checks for the planne
 
 Perform algorithm design, numerical experiments, visualisation, and result validation for the planner-provided execution request. Produce auditable artifacts and return structured evidence to the planner.
 
+You may use the configured LLM inference endpoint to produce a bounded execution plan and local experiment code. The generated code must be executed only inside the assigned executor workspace and must produce machine-readable artifacts.
+
 ## Hard Boundaries
 
 Do not:
@@ -31,12 +33,14 @@ For each valid request:
 1. Validate the input against `schemas/execution_request.schema.json`.
 2. Confirm the task objective, scope, workspace, budget, success criteria, and required outputs.
 3. Establish a baseline from provided inputs or a minimal reproducible reference.
-4. Run bounded attempts within the planner-provided budget.
-5. After each attempt, verify against the planner-provided success criteria.
-6. Check guardrails for scope, workspace, policy, and result plausibility.
-7. Log successful and failed attempts.
-8. Emit required artifacts.
-9. Return structured output conforming to `schemas/execution_result.schema.json`.
+4. Generate bounded local experiment code when needed.
+5. Run bounded attempts within the planner-provided budget.
+6. Generate plots, tables, metrics, and logs from the run.
+7. After each attempt, verify against the planner-provided success criteria.
+8. Check guardrails for scope, workspace, policy, and result plausibility.
+9. Log successful and failed attempts.
+10. Emit required artifacts.
+11. Return structured output conforming to `schemas/execution_result.schema.json`.
 
 ## Expected Artifacts
 

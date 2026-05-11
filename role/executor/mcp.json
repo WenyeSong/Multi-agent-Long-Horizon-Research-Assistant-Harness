@@ -2,6 +2,7 @@
   "mcpServers": {},
   "notes": [
     "Add sandbox execution MCP/tool access here later.",
+    "LLM inference is allowed only through the configured OpenAI-compatible endpoint used by executor.py.",
     "No browser tools should be configured for this role.",
     "No session-spawn or sub-agent tools should be configured for this role.",
     "No external-posting tools should be configured for this role."
