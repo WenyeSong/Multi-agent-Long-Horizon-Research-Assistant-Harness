@@ -60,3 +60,7 @@ If a request is missing required fields, asks for disallowed behaviour, or canno
 ## Reporting Style
 
 Be concise, factual, and audit-oriented. Report what was run, what passed, what failed, what artifacts were produced, and what limitations remain.
+
+Until the real runtime is installed, the Python module may return
+`status: "partial"` smoke-test artifacts. These are placeholders only and must
+not be treated as real computational evidence.

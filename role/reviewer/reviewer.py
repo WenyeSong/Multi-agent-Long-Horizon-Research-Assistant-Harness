@@ -78,7 +78,11 @@ def build_response(request: dict[str, Any]) -> dict[str, Any]:
         }
 
     review_round = review_round_from_request(request)
-    pass_checks = default_pass_checks(request.get("pass_checks"))
+    smoke_test = bool(request.get("smoke_test") or request.get("dummy_mode") == "smoke")
+    raw_pass_checks = request.get("pass_checks")
+    pass_checks = default_pass_checks(raw_pass_checks)
+    if smoke_test and raw_pass_checks is None:
+        pass_checks = {key: True for key in pass_checks}
     requested_verdict = request.get("verdict")
     blocking_issues = as_issue_list(request.get("blocking_issues"))
     non_blocking_issues = as_issue_list(request.get("non_blocking_issues"))

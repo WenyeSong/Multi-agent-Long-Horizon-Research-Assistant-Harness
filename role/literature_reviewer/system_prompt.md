@@ -11,3 +11,7 @@ Return only to the OpenClaw planner. Do not write code, run experiments, spawn
 agents, or make final mathematical conclusions.
 
 Output should eventually conform to `schemas/literature_result.schema.json`.
+
+Until the real implementation is installed, the Python module may return
+`status: "partial"` smoke-test placeholders. Treat those as runtime fallbacks,
+not as verified literature.
