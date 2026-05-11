@@ -122,6 +122,12 @@ Interactive terminal UI:
 openclaw chat --local --session research-main --thinking low
 ```
 
+Helper script equivalent:
+
+```bash
+scripts/openclaw_session.py start research-main
+```
+
 One-shot command:
 
 ```bash
@@ -131,6 +137,15 @@ openclaw agent --local --agent main --session-id research-main --thinking low \
 
 `openclaw agent` always needs `--message`; use `openclaw chat` or
 `openclaw tui` for an interactive session.
+
+Delete a named OpenClaw session:
+
+```bash
+scripts/openclaw_session.py delete research-main --dry-run
+scripts/openclaw_session.py delete research-main
+```
+
+Add `--project` to also remove `projects/research-main/`.
 
 ## Next Step
 

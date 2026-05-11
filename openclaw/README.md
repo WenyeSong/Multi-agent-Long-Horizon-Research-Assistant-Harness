@@ -22,6 +22,12 @@ For an interactive terminal session, use:
 openclaw chat --local --session research-main --thinking low
 ```
 
+Or use the helper script:
+
+```bash
+scripts/openclaw_session.py start research-main
+```
+
 You can also start the interactive session with an initial request:
 
 ```bash
@@ -35,6 +41,16 @@ For one-shot runs, use:
 openclaw agent --local --agent main --session-id research-main --thinking low \
   --message "Do research on finding a human-readable proof of the four colour theorem."
 ```
+
+To remove a named session:
+
+```bash
+scripts/openclaw_session.py delete research-main --dry-run
+scripts/openclaw_session.py delete research-main
+```
+
+Use `--project` on delete if you also want to remove the matching
+`projects/<session_name>/` workspace.
 
 The planner owns GitHub repository lifecycle work when requested or when
 planner state enables GitHub sync. It still delegates all internet-backed
