@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/multi-agent-hackathon/state.schema.json",
+  "title": "PlannerState",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_id",
+    "phase",
+    "compliance_mode",
+    "problem",
+    "completed",
+    "artifacts",
+    "allowed_next_actions"
+  ],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "S0_intake",
+        "S1_problem_analysis",
+        "S2_lit_review",
+        "S3_lit_synthesis",
+        "S4_execution_plan",
+        "S5_execution",
+        "S6_review",
+        "S7_revise",
+        "S8_pdf_generate",
+        "S9_final"
+      ]
+    },
+    "compliance_mode": {
+      "type": "string",
+      "enum": ["study_assistant", "independent_research"],
+      "default": "study_assistant"
+    },
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain", "project_id", "research_goal", "summary"],
+      "properties": {
+        "domain": { "type": "string" },
+        "project_id": { "type": "string" },
+        "research_goal": { "type": "string" },
+        "summary": { "type": "string" },
+        "assessment_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "is_coursework": { "type": "boolean" },
+            "source_policy_refs": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "marking_weights": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "program_runs_and_figures": { "type": "number" },
+                "mathematical_answers_and_observations": { "type": "number" },
+                "report_clarity": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "completed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "problem_analysis",
+        "literature_review",
+        "lit_synthesis",
+        "execution_plan",
+        "execution",
+        "review",
+        "pdf"
+      ],
+      "properties": {
+        "problem_analysis": { "type": "boolean" },
+        "literature_review": { "type": "boolean" },
+        "lit_synthesis": { "type": "boolean" },
+        "execution_plan": { "type": "boolean" },
+        "execution": { "type": "boolean" },
+        "review": { "type": "boolean" },
+        "pdf": { "type": "boolean" }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "properties": {
+        "input": { "type": "string" },
+        "plan": { "type": "string" },
+        "literature": { "type": "string" },
+        "method_matrix": { "type": "string" },
+        "execution_plan": { "type": "string" },
+        "results": { "type": "string" },
+        "figures": { "type": "string" },
+        "review": { "type": "string" },
+        "approved_content": { "type": "string" },
+        "report_spec": { "type": "string" },
+        "final_pdf": { "type": "string" }
+      }
+    },
+    "last_worker_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "enum": [
+            "literature_reviewer",
+            "executor",
+            "reviewer",
+            "pdf_generator"
+          ]
+        },
+        "status": { "type": "string" },
+        "artifact_ref": { "type": "string" },
+        "received_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "allowed_next_actions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "spawn_literature_reviewer",
+          "synthesize_literature",
+          "write_execution_plan",
+          "spawn_executor",
+          "spawn_reviewer",
+          "revise_literature",
+          "revise_execution",
+          "revise_pdf",
+          "spawn_pdf_generator",
+          "block_for_human",
+          "return_final"
+        ]
+      }
+    },
+    "decision_history_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

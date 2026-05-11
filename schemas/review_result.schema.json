@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/multi-agent-hackathon/review_result.schema.json",
+  "title": "ReviewResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verdict",
+    "blocking_issues",
+    "non_blocking_issues",
+    "pass_checks",
+    "compliance_risk",
+    "next_action"
+  ],
+  "properties": {
+    "verdict": { "type": "string", "enum": ["PASS", "REVISE", "BLOCK"] },
+    "blocking_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "severity", "message", "send_back_to"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "math_correctness",
+              "literature_traceability",
+              "evidence_quality",
+              "reproducibility",
+              "figure_quality",
+              "consistency",
+              "compliance",
+              "presentation"
+            ]
+          },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "message": { "type": "string" },
+          "send_back_to": {
+            "type": "string",
+            "enum": [
+              "planner",
+              "literature_reviewer",
+              "executor",
+              "pdf_generator",
+              "human"
+            ]
+          }
+        }
+      }
+    },
+    "non_blocking_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "message"],
+        "properties": {
+          "type": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "pass_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "citations_traceable",
+        "ten_papers_summarized_without_obvious_hallucination",
+        "math_matches_problem",
+        "results_reproducible",
+        "figures_labeled",
+        "code_text_consistent",
+        "not_packaged_as_student_submission",
+        "pdf_adds_no_unreviewed_claims"
+      ],
+      "properties": {
+        "citations_traceable": { "type": "boolean" },
+        "ten_papers_summarized_without_obvious_hallucination": {
+          "type": "boolean"
+        },
+        "math_matches_problem": { "type": "boolean" },
+        "results_reproducible": { "type": "boolean" },
+        "figures_labeled": { "type": "boolean" },
+        "code_text_consistent": { "type": "boolean" },
+        "not_packaged_as_student_submission": { "type": "boolean" },
+        "pdf_adds_no_unreviewed_claims": { "type": "boolean" }
+      }
+    },
+    "compliance_risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "reason"],
+      "properties": {
+        "level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "reason": { "type": "string" }
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "enum": ["return_to_planner", "block_for_human"]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "verdict": { "const": "PASS" } } },
+      "then": {
+        "properties": {
+          "blocking_issues": { "maxItems": 0 },
+          "next_action": { "const": "return_to_planner" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "verdict": { "const": "BLOCK" } } },
+      "then": {
+        "properties": {
+          "next_action": { "const": "block_for_human" }
+        }
+      }
+    }
+  ]
+}

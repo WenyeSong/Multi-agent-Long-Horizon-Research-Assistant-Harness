@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/multi-agent-hackathon/literature_result.schema.json",
+  "title": "LiteratureReviewResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "selected_papers",
+    "theme_analysis",
+    "risks",
+    "artifact_refs"
+  ],
+  "properties": {
+    "status": { "type": "string", "enum": ["ok", "partial", "blocked"] },
+    "selected_papers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "authors",
+          "year",
+          "venue",
+          "doi_or_arxiv",
+          "url",
+          "relevance_score",
+          "method_summary",
+          "key_equations",
+          "assumptions",
+          "limitations",
+          "connection_to_problem"
+        ],
+        "properties": {
+          "title": { "type": "string" },
+          "authors": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "year": { "type": "integer", "minimum": 1800 },
+          "venue": { "type": "string" },
+          "doi_or_arxiv": { "type": "string" },
+          "url": { "type": "string" },
+          "relevance_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "method_summary": { "type": "string" },
+          "key_equations": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "assumptions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "limitations": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "connection_to_problem": { "type": "string" },
+          "source_confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "default": "medium"
+          }
+        }
+      }
+    },
+    "theme_analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["themes", "method_families"],
+      "properties": {
+        "themes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "method_families": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "artifact_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

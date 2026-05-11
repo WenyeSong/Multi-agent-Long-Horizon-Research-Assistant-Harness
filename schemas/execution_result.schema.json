@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/multi-agent-hackathon/execution_result.schema.json",
+  "title": "ExecutionResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "execution_mode",
+    "algorithm_plan",
+    "code_artifacts",
+    "figures",
+    "results",
+    "limitations"
+  ],
+  "properties": {
+    "status": { "type": "string", "enum": ["ok", "partial", "blocked"] },
+    "execution_mode": {
+      "type": "string",
+      "enum": ["research_support", "independent_research"]
+    },
+    "algorithm_plan": { "type": "string" },
+    "code_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "purpose"],
+        "properties": {
+          "path": { "type": "string" },
+          "purpose": { "type": "string" },
+          "submission_safe": {
+            "type": "boolean",
+            "description": "False when the artifact could be mistaken for directly submit-ready coursework."
+          }
+        }
+      }
+    },
+    "figures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "caption"],
+        "properties": {
+          "path": { "type": "string" },
+          "caption": { "type": "string" },
+          "axes_described": { "type": "boolean" },
+          "parameters_described": { "type": "boolean" }
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "main_findings",
+        "numerical_checks",
+        "known_case_validation"
+      ],
+      "properties": {
+        "main_findings": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "numerical_checks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "known_case_validation": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "reproducibility_notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

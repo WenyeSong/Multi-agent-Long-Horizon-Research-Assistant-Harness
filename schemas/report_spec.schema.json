@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/multi-agent-hackathon/report_spec.schema.json",
+  "title": "ReportSpec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_id",
+    "approved_by_reviewer",
+    "review_artifact_ref",
+    "report_type",
+    "sections",
+    "artifact_refs"
+  ],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
+    },
+    "approved_by_reviewer": { "const": true },
+    "review_artifact_ref": { "type": "string" },
+    "report_type": {
+      "type": "string",
+      "enum": ["research_memo", "independent_research_report"]
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "Problem overview",
+          "Literature review",
+          "Methodological synthesis",
+          "Computational experiments",
+          "Validation",
+          "Limitations",
+          "References",
+          "Appendix: evidence matrix"
+        ]
+      }
+    },
+    "artifact_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "no_new_facts": { "const": true },
+        "no_new_conclusions": { "const": true },
+        "only_approved_artifacts": { "const": true },
+        "max_lines_per_paper_in_matrix": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 5
+        }
+      }
+    }
+  }
+}
