@@ -35,6 +35,7 @@ first_agent.py
 lg_hello.py
 test.py
 env_start.sh
+execution_runs/
 
 # OS/editor noise
 .DS_Store
