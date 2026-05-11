@@ -1,0 +1,5 @@
+{
+  "baseline_name": "toy_mean_baseline",
+  "objective": "Summarise the value column from the toy dataset.",
+  "target_column": "value"
+}

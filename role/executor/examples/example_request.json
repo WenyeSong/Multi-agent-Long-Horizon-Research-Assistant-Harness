@@ -2,9 +2,9 @@
   "request_id": "exec_001",
   "planner_id": "planner_run_001",
   "task": {
-    "title": "Parameter sweep for baseline optimiser",
-    "objective": "Run a small parameter sweep for the planner-provided baseline optimiser and report the best observed configuration.",
-    "scope": "Use only the provided baseline code and dataset. Generate numerical metrics, a summary table, and diagnostic figures.",
+    "title": "Toy dataset summary run",
+    "objective": "Read the provided toy dataset, compute summary metrics for the configured target column, and produce a diagnostic figure.",
+    "scope": "Use only the provided baseline config and dataset. Generate numerical metrics, a summary table, and a diagnostic figure.",
     "non_goals": [
       "Do not search for alternative algorithms.",
       "Do not rewrite the global research plan.",
@@ -14,31 +14,31 @@
   "workspace": {
     "root": "role/executor/workspaces/exec_001",
     "read_paths": [
-      "role/executor/workspaces/exec_001/inputs/baseline_optimizer.py",
-      "role/executor/workspaces/exec_001/inputs/dataset.csv"
+      "role/executor/examples/inputs/baseline_config.json",
+      "role/executor/examples/inputs/dataset.csv"
     ],
     "write_path": "role/executor/workspaces/exec_001"
   },
   "inputs": [
     {
       "artifact_id": "baseline_optimizer",
-      "path": "role/executor/workspaces/exec_001/inputs/baseline_optimizer.py",
-      "kind": "code",
-      "description": "Planner-provided baseline optimiser implementation.",
+      "path": "role/executor/examples/inputs/baseline_config.json",
+      "kind": "config",
+      "description": "Toy baseline configuration for the self-contained executor example.",
       "read_only": true
     },
     {
       "artifact_id": "dataset_main",
-      "path": "role/executor/workspaces/exec_001/inputs/dataset.csv",
+      "path": "role/executor/examples/inputs/dataset.csv",
       "kind": "dataset",
-      "description": "Planner-approved dataset for this execution request.",
+      "description": "Toy dataset for the self-contained executor example.",
       "read_only": true
     }
   ],
   "success_criteria": [
     {
       "criterion_id": "crit_results_json",
-      "description": "Produce results.json containing baseline metrics, attempted configurations, and the best observed configuration.",
+      "description": "Produce results.json containing baseline metrics, attempted metrics, and the best observed value.",
       "check_type": "property_check",
       "target": {
         "required_keys": ["baseline", "attempts", "best_attempt"]
