@@ -2,7 +2,12 @@
   "id": "main",
   "name": "OpenClaw Main Planner",
   "kind": "openclaw_agent",
-  "workspace": ".",
+  "workspace": "/home/akame/mphildis/events/multi-agent-hackathon",
+  "sandbox": {
+    "mode": "all",
+    "workspaceAccess": "rw",
+    "workspaceRoot": "/home/akame/mphildis/events/multi-agent-hackathon"
+  },
   "llm_config": {
     "active": "llm_config.json",
     "source": "llm_config_openrouter.json",
@@ -29,6 +34,8 @@
   "notes": [
     "This single OpenClaw agent is both main and research planner.",
     "It receives user input, maintains planner state, employs preexisting workers, and returns final results.",
+    "It must fail fast if the repository workspace is not visible inside the sandbox.",
+    "It must never scaffold replacement roles or schemas in /tmp or /workspace.",
     "It must not access the internet directly for research; literature_reviewer owns internet-backed research.",
     "It may use GitHub operational tools for repository lifecycle management.",
     "It must cap reviewer loops at five rounds and require an explicit forced PASS on the fifth round."

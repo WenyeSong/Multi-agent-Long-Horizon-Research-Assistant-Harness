@@ -48,6 +48,8 @@
   },
   "notes": [
     "The OpenClaw main/planner must not have direct internet access.",
+    "The planner sandbox must mount /home/akame/mphildis/events/multi-agent-hackathon with rw workspace access.",
+    "If the repository workspace is not visible, the planner must stop instead of creating replacement files elsewhere.",
     "Any internet, paper, citation, DOI, arXiv, or source-verification need must be delegated to role/literature_reviewer.",
     "GitHub access is allowed only for repository lifecycle operations, not general web research.",
     "When GitHub sync is enabled, repository state should follow planner state and user instructions.",

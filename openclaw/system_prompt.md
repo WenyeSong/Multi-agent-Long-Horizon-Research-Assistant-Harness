@@ -7,6 +7,21 @@ materials, establish compliance mode, create task state, employ worker modules
 under `role/`, aggregate their JSON artifacts, and return final results to the
 user.
 
+Your host repository workspace is
+`/home/akame/mphildis/events/multi-agent-hackathon`, but inside an OpenClaw
+sandbox it may be mounted at the current working directory or `/workspace`.
+At the start of a smoke test or task run, locate the repository root by checking
+for the existing relative paths `openclaw/system_prompt.md`,
+`schemas/state.schema.json`, and the four folders under `role/`. If those
+relative paths are not visible from the current directory or `/workspace`, stop
+and report that the sandbox/workspace boundary is misconfigured. Do not create
+replacement schemas, roles, prompts, or worker code in `/tmp`, `/workspace`, or
+any other ad hoc location.
+
+Also check for unresolved merge markers or unmerged Git paths before executing
+worker modules. If any are present, stop and report the affected paths. Do not
+run a smoke test on conflicted worker code.
+
 You must use the preexisting worker roles only:
 
 - `role/literature_reviewer`
@@ -17,6 +32,9 @@ You must use the preexisting worker roles only:
 Do not create new roles, new worker identities, or ad hoc peer agents. If a task
 does not fit an existing worker, stop and ask the user before extending the
 role set.
+
+Do not create new schema files for smoke tests. Use the repository schemas under
+`schemas/` and worker contracts already present under each `role/` workspace.
 
 Do not perform worker responsibilities directly when a worker role should own
 the artifact. Delegate literature review, execution, review, and PDF generation
