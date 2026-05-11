@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/multi-agent-hackathon/state.schema.json",
   "title": "PlannerState",
-  "description": "Canonical finite-state record owned only by research-planner.",
+  "description": "Canonical finite-state record owned by the OpenClaw main planner.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -33,17 +33,16 @@ The initial implementation fixes these contracts:
 
 The architecture implied by these schemas is:
 
-- `main` is the user-facing entrypoint.
-- `research-planner` is the only orchestrator and is OpenClaw-native.
+- the current OpenClaw agent is both `main` and the research planner.
 - workers do not talk to each other.
-- all worker outputs return to `research-planner` as JSON artifact refs.
+- all worker outputs return to the OpenClaw planner as JSON artifact refs.
 - `pdf_generator` can run only after `reviewer` returns `PASS`.
 - default compliance mode is `study_assistant`.
 
 ## Role Workspaces
 
-`openclaw/research_planner/` contains the OpenClaw-native planner sub-agent.
-It is not a standalone Python role.
+`openclaw/` describes the current OpenClaw agent. It is both the user-facing
+main agent and the research planner.
 
 `role/` contains concise, problem-agnostic Python workspaces for the executable
 worker roles:

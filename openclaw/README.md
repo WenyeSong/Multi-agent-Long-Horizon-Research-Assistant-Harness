@@ -1,7 +1,8 @@
-# OpenClaw Roles
+# OpenClaw Agent
 
-This folder contains OpenClaw-native role workspaces. These are not standalone
-Python worker modules.
+This folder describes the current OpenClaw agent for this workspace.
 
-`research_planner/` is the planner/orchestrator sub-agent. It owns the state
-machine and delegates work to the executable worker roles under `role/`.
+There is no separate `main` agent and `research_planner` agent. The current
+OpenClaw agent is both the user-facing main agent and the research planner.
+
+Executable worker roles live under `role/`.

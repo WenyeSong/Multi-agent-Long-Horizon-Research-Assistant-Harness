@@ -10,8 +10,8 @@ Included executable worker roles:
 - `reviewer`
 - `pdf_generator`
 
-`research_planner` is not a Python worker role. It is an OpenClaw-native
-planner under `openclaw/research_planner/`.
+There is no separate `research_planner` worker. The current OpenClaw agent is
+both main and planner, as described in `openclaw/`.
 
 Each role contains:
 

@@ -1,0 +1,17 @@
+{
+  "id": "main",
+  "name": "OpenClaw Main Planner",
+  "kind": "openclaw_agent",
+  "workspace": ".",
+  "state_schema": "schemas/state.schema.json",
+  "worker_roles": [
+    "role/literature_reviewer",
+    "role/executor",
+    "role/reviewer",
+    "role/pdf_generator"
+  ],
+  "notes": [
+    "This single OpenClaw agent is both main and research planner.",
+    "It receives user input, maintains planner state, spawns workers, and returns final results."
+  ]
+}

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/multi-agent-hackathon/literature_result.schema.json",
   "title": "LiteratureReviewResult",
-  "description": "Structured result returned by literature_reviewer to research-planner.",
+  "description": "Structured result returned by literature_reviewer to the OpenClaw planner.",
   "type": "object",
   "additionalProperties": false,
   "required": [
