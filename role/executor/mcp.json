@@ -2,6 +2,8 @@
   "mcpServers": {},
   "notes": [
     "Add sandbox execution MCP/tool access here later.",
-    "No browser or spawn tools should be configured for this role."
+    "No browser tools should be configured for this role.",
+    "No session-spawn or sub-agent tools should be configured for this role.",
+    "No external-posting tools should be configured for this role."
   ]
 }

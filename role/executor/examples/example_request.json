@@ -1,0 +1,82 @@
+{
+  "request_id": "exec_001",
+  "planner_id": "planner_run_001",
+  "task": {
+    "title": "Parameter sweep for baseline optimiser",
+    "objective": "Run a small parameter sweep for the planner-provided baseline optimiser and report the best observed configuration.",
+    "scope": "Use only the provided baseline code and dataset. Generate numerical metrics, a summary table, and diagnostic figures.",
+    "non_goals": [
+      "Do not search for alternative algorithms.",
+      "Do not rewrite the global research plan.",
+      "Do not generate final coursework code or a PDF report."
+    ]
+  },
+  "workspace": {
+    "root": "execution_runs/exec_001",
+    "read_paths": [
+      "execution_runs/exec_001/inputs/baseline_optimizer.py",
+      "execution_runs/exec_001/inputs/dataset.csv"
+    ],
+    "write_path": "execution_runs/exec_001"
+  },
+  "inputs": [
+    {
+      "artifact_id": "baseline_optimizer",
+      "path": "execution_runs/exec_001/inputs/baseline_optimizer.py",
+      "kind": "code",
+      "description": "Planner-provided baseline optimiser implementation.",
+      "read_only": true
+    },
+    {
+      "artifact_id": "dataset_main",
+      "path": "execution_runs/exec_001/inputs/dataset.csv",
+      "kind": "dataset",
+      "description": "Planner-approved dataset for this execution request.",
+      "read_only": true
+    }
+  ],
+  "success_criteria": [
+    {
+      "criterion_id": "crit_results_json",
+      "description": "Produce results.json containing baseline metrics, attempted configurations, and the best observed configuration.",
+      "check_type": "property_check",
+      "target": {
+        "required_keys": ["baseline", "attempts", "best_attempt"]
+      },
+      "required": true
+    },
+    {
+      "criterion_id": "crit_metric_threshold",
+      "description": "At least one attempted configuration must improve the baseline objective metric.",
+      "check_type": "metric_threshold",
+      "target": {
+        "metric": "objective_value",
+        "comparison": "greater_than_baseline"
+      },
+      "required": true
+    },
+    {
+      "criterion_id": "crit_diagnostic_figure",
+      "description": "Produce at least one diagnostic plot under figures/.",
+      "check_type": "visual_inspection",
+      "target": {
+        "minimum_figures": 1
+      },
+      "required": true
+    }
+  ],
+  "budget": {
+    "max_attempts": 3,
+    "max_wall_time_minutes": 20,
+    "max_compute_notes": "Keep the sweep small enough for local execution."
+  },
+  "required_outputs": [
+    "results.json",
+    "tests.json",
+    "environment.json",
+    "figures",
+    "logs",
+    "notes.md"
+  ],
+  "tool_policy_ref": "role/executor/docs/tool_policy.md"
+}

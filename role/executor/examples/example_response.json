@@ -1,0 +1,134 @@
+{
+  "request_id": "exec_001",
+  "status": "succeeded",
+  "summary": "Completed a three-attempt parameter sweep. Attempt 02 produced the best objective value and passed the required validation checks.",
+  "artifacts": [
+    {
+      "artifact_id": "results_main",
+      "path": "execution_runs/exec_001/results.json",
+      "kind": "results",
+      "description": "Main metrics, baseline result, attempted configurations, and best observed configuration.",
+      "format": "json",
+      "role": "primary_result",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "tests_main",
+      "path": "execution_runs/exec_001/tests.json",
+      "kind": "tests",
+      "description": "Validation checks mapped to planner success criteria.",
+      "format": "json",
+      "role": "audit",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "environment_main",
+      "path": "execution_runs/exec_001/environment.json",
+      "kind": "environment",
+      "description": "Python, package, platform, and seed metadata.",
+      "format": "json",
+      "role": "audit",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "artifacts_manifest",
+      "path": "execution_runs/exec_001/artifacts.json",
+      "kind": "metadata",
+      "description": "Manifest of generated executor artifacts.",
+      "format": "json",
+      "role": "audit",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "fig_attempt_02_objective_curve",
+      "path": "execution_runs/exec_001/figures/attempt_02_objective_curve.png",
+      "kind": "figure",
+      "description": "Diagnostic curve for the best observed attempt.",
+      "format": "png",
+      "role": "diagnostic",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "table_all_attempts_summary",
+      "path": "execution_runs/exec_001/tables/all_attempts_summary.csv",
+      "kind": "table",
+      "description": "Rectangular summary of baseline and attempted parameter settings.",
+      "format": "csv",
+      "role": "supporting",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "notes_main",
+      "path": "execution_runs/exec_001/notes.md",
+      "kind": "notes",
+      "description": "Short interpretation notes and limitations.",
+      "format": "md",
+      "role": "supporting",
+      "created_by_executor": true
+    }
+  ],
+  "validation": {
+    "overall": "passed",
+    "checks": [
+      {
+        "criterion_id": "crit_results_json",
+        "status": "passed",
+        "evidence": "results.json contains baseline, attempts, and best_attempt keys.",
+        "artifact_refs": ["results_main"]
+      },
+      {
+        "criterion_id": "crit_metric_threshold",
+        "status": "passed",
+        "evidence": "Attempt 02 improved objective_value from 0.71 to 0.78.",
+        "metric_value": {
+          "baseline": 0.71,
+          "best_attempt": 0.78
+        },
+        "artifact_refs": ["results_main", "table_all_attempts_summary"]
+      },
+      {
+        "criterion_id": "crit_diagnostic_figure",
+        "status": "passed",
+        "evidence": "One diagnostic figure was written under figures/.",
+        "artifact_refs": ["fig_attempt_02_objective_curve"]
+      }
+    ]
+  },
+  "attempts": [
+    {
+      "attempt_id": "attempt_01",
+      "status": "failed",
+      "description": "First parameter setting completed but did not improve the baseline objective value.",
+      "failure_reason": "Objective value was below baseline.",
+      "artifact_refs": ["table_all_attempts_summary"]
+    },
+    {
+      "attempt_id": "attempt_02",
+      "status": "succeeded",
+      "description": "Second parameter setting produced the best observed objective value.",
+      "artifact_refs": ["results_main", "fig_attempt_02_objective_curve", "table_all_attempts_summary"]
+    },
+    {
+      "attempt_id": "attempt_03",
+      "status": "failed",
+      "description": "Third parameter setting completed but was less stable than attempt 02.",
+      "failure_reason": "Higher variance in repeated checks.",
+      "artifact_refs": ["table_all_attempts_summary"]
+    }
+  ],
+  "policy_observance": {
+    "browser_used": false,
+    "sessions_spawned": false,
+    "external_post_performed": false,
+    "write_scope_respected": true,
+    "notes": "All writes stayed under execution_runs/exec_001."
+  },
+  "limitations": [
+    "Small sweep only; planner should decide whether broader search is needed.",
+    "Single dataset was used because no additional planner-authorised datasets were provided."
+  ],
+  "recommended_planner_next_steps": [
+    "Review whether the improvement is large enough to justify a broader planner-approved sweep.",
+    "Ask reviewer to inspect the diagnostic figure if this result will be used in the final report."
+  ]
+}
