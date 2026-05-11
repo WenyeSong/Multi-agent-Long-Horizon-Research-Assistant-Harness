@@ -2,9 +2,9 @@
 
 Workspace for a planner-centered OpenClaw multi-agent research assistant.
 
-The design is deliberately not a many-agent chat room. `main` talks to the
-user, `research-planner` orchestrates, and all workers return artifacts to the
-planner.
+This repo is currently at the schema-first stage. The five JSON contracts in
+`schemas/` define the planner state and worker outputs before any agent prompts
+or OpenClaw runtime config are added.
 
 ## Repository Hygiene
 
@@ -21,15 +21,24 @@ Use `.env.example` and `llm_config.example.json` as templates for local setup.
 Task workspaces under `projects/` are ignored by Git because they can contain
 user attachments, generated artifacts, and assessment context.
 
-## Architecture
+## Contracts
 
-- `docs/architecture.md` describes the agent topology, finite-state planner,
-  reviewer gate, and compliance rules.
-- `docs/workspace-layout.md` describes the per-task artifact tree.
-- `config/openclaw.agents.example.json` contains an example OpenClaw agent
-  policy layout.
-- `prompts/` contains the system prompts for each agent role.
-- `schemas/` contains the JSON contracts that planner and workers exchange.
+The initial implementation fixes these contracts:
+
+- `schemas/state.schema.json`
+- `schemas/literature_result.schema.json`
+- `schemas/execution_result.schema.json`
+- `schemas/review_result.schema.json`
+- `schemas/report_spec.schema.json`
+
+The architecture implied by these schemas is:
+
+- `main` is the user-facing entrypoint.
+- `research-planner` is the only orchestrator.
+- workers do not talk to each other.
+- all worker outputs return to `research-planner` as JSON artifact refs.
+- `pdf_generator` can run only after `reviewer` returns `PASS`.
+- default compliance mode is `study_assistant`.
 
 ## Local Setup
 
@@ -42,11 +51,7 @@ cp .env.example .env
 Fill `.env` with local credentials, then create local model config files from
 the example as needed.
 
-Create a task workspace:
+## Next Step
 
-```bash
-scripts/create_project_workspace.sh catam_2026_001
-```
-
-Validate the generated state with your preferred JSON Schema validator against
-`schemas/state.schema.json`.
+After these schemas are reviewed, add OpenClaw agent configuration and system
+prompts that enforce the schema contracts and tool boundaries.

@@ -2,37 +2,40 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/multi-agent-hackathon/execution_result.schema.json",
   "title": "ExecutionResult",
+  "description": "Structured result returned by executor to research-planner.",
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "trace_id",
     "status",
+    "compliance_mode",
     "execution_mode",
     "algorithm_plan",
     "code_artifacts",
     "figures",
     "results",
-    "limitations"
+    "limitations",
+    "coursework_safety"
   ],
   "properties": {
+    "trace_id": { "$ref": "#/$defs/trace_id" },
     "status": { "type": "string", "enum": ["ok", "partial", "blocked"] },
+    "compliance_mode": { "$ref": "#/$defs/compliance_mode" },
     "execution_mode": {
       "type": "string",
       "enum": ["research_support", "independent_research"]
     },
-    "algorithm_plan": { "type": "string" },
+    "algorithm_plan": { "type": "string", "minLength": 1 },
     "code_artifacts": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["path", "purpose"],
+        "required": ["path", "purpose", "submission_safe"],
         "properties": {
-          "path": { "type": "string" },
-          "purpose": { "type": "string" },
-          "submission_safe": {
-            "type": "boolean",
-            "description": "False when the artifact could be mistaken for directly submit-ready coursework."
-          }
+          "path": { "$ref": "#/$defs/artifact_ref" },
+          "purpose": { "type": "string", "minLength": 1 },
+          "submission_safe": { "type": "boolean" }
         }
       }
     },
@@ -41,10 +44,10 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["path", "caption"],
+        "required": ["path", "caption", "axes_described", "parameters_described"],
         "properties": {
-          "path": { "type": "string" },
-          "caption": { "type": "string" },
+          "path": { "$ref": "#/$defs/artifact_ref" },
+          "caption": { "type": "string", "minLength": 1 },
           "axes_described": { "type": "boolean" },
           "parameters_described": { "type": "boolean" }
         }
@@ -56,30 +59,76 @@
       "required": [
         "main_findings",
         "numerical_checks",
-        "known_case_validation"
+        "known_case_validation",
+        "reproducibility_notes"
       ],
       "properties": {
         "main_findings": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string", "minLength": 1 }
         },
         "numerical_checks": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string", "minLength": 1 }
         },
         "known_case_validation": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string", "minLength": 1 }
         },
         "reproducibility_notes": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string", "minLength": 1 }
         }
       }
     },
     "limitations": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "coursework_safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direct_submission_artifacts", "notes"],
+      "properties": {
+        "direct_submission_artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artifact_ref" }
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "compliance_mode": { "const": "study_assistant" } } },
+      "then": {
+        "properties": {
+          "execution_mode": { "const": "research_support" },
+          "coursework_safety": {
+            "properties": {
+              "direct_submission_artifacts": { "maxItems": 0 }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
+    },
+    "compliance_mode": {
+      "type": "string",
+      "enum": ["study_assistant", "independent_research"]
+    },
+    "artifact_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(projects/|/projects/|\\./projects/).+"
     }
   }
 }

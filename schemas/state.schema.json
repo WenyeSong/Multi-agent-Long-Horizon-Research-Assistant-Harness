@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/multi-agent-hackathon/state.schema.json",
   "title": "PlannerState",
+  "description": "Canonical finite-state record owned only by research-planner.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -14,10 +15,7 @@
     "allowed_next_actions"
   ],
   "properties": {
-    "trace_id": {
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
-    },
+    "trace_id": { "$ref": "#/$defs/trace_id" },
     "phase": {
       "type": "string",
       "enum": [
@@ -33,36 +31,33 @@
         "S9_final"
       ]
     },
-    "compliance_mode": {
-      "type": "string",
-      "enum": ["study_assistant", "independent_research"],
-      "default": "study_assistant"
-    },
+    "compliance_mode": { "$ref": "#/$defs/compliance_mode" },
     "problem": {
       "type": "object",
       "additionalProperties": false,
       "required": ["domain", "project_id", "research_goal", "summary"],
       "properties": {
-        "domain": { "type": "string" },
-        "project_id": { "type": "string" },
-        "research_goal": { "type": "string" },
+        "domain": { "type": "string", "minLength": 1 },
+        "project_id": { "type": "string", "minLength": 1 },
+        "research_goal": { "type": "string", "minLength": 1 },
         "summary": { "type": "string" },
         "assessment_context": {
           "type": "object",
           "additionalProperties": false,
+          "required": ["is_coursework"],
           "properties": {
             "is_coursework": { "type": "boolean" },
             "source_policy_refs": {
               "type": "array",
-              "items": { "type": "string" }
+              "items": { "$ref": "#/$defs/artifact_ref" }
             },
             "marking_weights": {
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "program_runs_and_figures": { "type": "number" },
-                "mathematical_answers_and_observations": { "type": "number" },
-                "report_clarity": { "type": "number" }
+                "program_runs_and_figures": { "type": "number", "minimum": 0, "maximum": 1 },
+                "mathematical_answers_and_observations": { "type": "number", "minimum": 0, "maximum": 1 },
+                "report_clarity": { "type": "number", "minimum": 0, "maximum": 1 }
               }
             }
           }
@@ -93,24 +88,39 @@
     },
     "artifacts": {
       "type": "object",
-      "additionalProperties": { "type": "string" },
+      "additionalProperties": false,
       "properties": {
-        "input": { "type": "string" },
-        "plan": { "type": "string" },
-        "literature": { "type": "string" },
-        "method_matrix": { "type": "string" },
-        "execution_plan": { "type": "string" },
-        "results": { "type": "string" },
-        "figures": { "type": "string" },
-        "review": { "type": "string" },
-        "approved_content": { "type": "string" },
-        "report_spec": { "type": "string" },
-        "final_pdf": { "type": "string" }
+        "user_request": { "$ref": "#/$defs/artifact_ref" },
+        "problem_materials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["material_id", "path", "allowed_use"],
+            "properties": {
+              "material_id": { "type": "string", "minLength": 1 },
+              "path": { "$ref": "#/$defs/artifact_ref" },
+              "allowed_use": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "plan": { "$ref": "#/$defs/artifact_ref" },
+        "literature_result": { "$ref": "#/$defs/artifact_ref" },
+        "method_matrix": { "$ref": "#/$defs/artifact_ref" },
+        "literature_synthesis": { "$ref": "#/$defs/artifact_ref" },
+        "execution_plan": { "$ref": "#/$defs/artifact_ref" },
+        "execution_result": { "$ref": "#/$defs/artifact_ref" },
+        "figures_dir": { "$ref": "#/$defs/artifact_ref" },
+        "review_result": { "$ref": "#/$defs/artifact_ref" },
+        "approved_content": { "$ref": "#/$defs/artifact_ref" },
+        "report_spec": { "$ref": "#/$defs/artifact_ref" },
+        "final_pdf": { "$ref": "#/$defs/artifact_ref" }
       }
     },
     "last_worker_result": {
       "type": "object",
       "additionalProperties": false,
+      "required": ["agent", "artifact_ref", "received_at"],
       "properties": {
         "agent": {
           "type": "string",
@@ -122,7 +132,7 @@
           ]
         },
         "status": { "type": "string" },
-        "artifact_ref": { "type": "string" },
+        "artifact_ref": { "$ref": "#/$defs/artifact_ref" },
         "received_at": { "type": "string", "format": "date-time" }
       }
     },
@@ -130,26 +140,73 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "enum": [
-          "spawn_literature_reviewer",
-          "synthesize_literature",
-          "write_execution_plan",
-          "spawn_executor",
-          "spawn_reviewer",
-          "revise_literature",
-          "revise_execution",
-          "revise_pdf",
-          "spawn_pdf_generator",
-          "block_for_human",
-          "return_final"
-        ]
+      "items": { "$ref": "#/$defs/action" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "phase": { "const": "S8_pdf_generate" } } },
+      "then": {
+        "properties": {
+          "completed": {
+            "properties": {
+              "review": { "const": true }
+            }
+          },
+          "artifacts": {
+            "required": ["review_result", "report_spec"]
+          },
+          "allowed_next_actions": {
+            "items": {
+              "enum": ["spawn_pdf_generator", "block_for_human"]
+            }
+          }
+        }
       }
     },
-    "decision_history_refs": {
-      "type": "array",
-      "items": { "type": "string" }
+    {
+      "if": { "properties": { "phase": { "const": "S9_final" } } },
+      "then": {
+        "properties": {
+          "allowed_next_actions": {
+            "items": {
+              "enum": ["return_final", "block_for_human"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
+    },
+    "compliance_mode": {
+      "type": "string",
+      "enum": ["study_assistant", "independent_research"],
+      "default": "study_assistant"
+    },
+    "artifact_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(projects/|/projects/|\\./projects/).+"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "spawn_literature_reviewer",
+        "synthesize_literature",
+        "write_execution_plan",
+        "spawn_executor",
+        "spawn_reviewer",
+        "revise_literature",
+        "revise_execution",
+        "revise_pdf",
+        "spawn_pdf_generator",
+        "block_for_human",
+        "return_final"
+      ]
     }
   }
 }

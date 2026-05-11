@@ -2,23 +2,24 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/multi-agent-hackathon/report_spec.schema.json",
   "title": "ReportSpec",
+  "description": "Input contract for pdf_generator. Must be created only after reviewer PASS.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "trace_id",
+    "compliance_mode",
     "approved_by_reviewer",
     "review_artifact_ref",
     "report_type",
     "sections",
-    "artifact_refs"
+    "artifact_refs",
+    "constraints"
   ],
   "properties": {
-    "trace_id": {
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
-    },
+    "trace_id": { "$ref": "#/$defs/trace_id" },
+    "compliance_mode": { "$ref": "#/$defs/compliance_mode" },
     "approved_by_reviewer": { "const": true },
-    "review_artifact_ref": { "type": "string" },
+    "review_artifact_ref": { "$ref": "#/$defs/artifact_ref" },
     "report_type": {
       "type": "string",
       "enum": ["research_memo", "independent_research_report"]
@@ -26,6 +27,7 @@
     "sections": {
       "type": "array",
       "minItems": 1,
+      "uniqueItems": true,
       "items": {
         "type": "string",
         "enum": [
@@ -43,11 +45,17 @@
     "artifact_refs": {
       "type": "array",
       "minItems": 1,
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/artifact_ref" }
     },
     "constraints": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "no_new_facts",
+        "no_new_conclusions",
+        "only_approved_artifacts",
+        "max_lines_per_paper_in_matrix"
+      ],
       "properties": {
         "no_new_facts": { "const": true },
         "no_new_conclusions": { "const": true },
@@ -58,6 +66,31 @@
           "maximum": 5
         }
       }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "compliance_mode": { "const": "study_assistant" } } },
+      "then": {
+        "properties": {
+          "report_type": { "const": "research_memo" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
+    },
+    "compliance_mode": {
+      "type": "string",
+      "enum": ["study_assistant", "independent_research"]
+    },
+    "artifact_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(projects/|/projects/|\\./projects/).+"
     }
   }
 }
