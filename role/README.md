@@ -34,3 +34,6 @@ load a JSON request, return a role envelope, and make the workspace replaceable.
 The OpenClaw planner should employ these existing worker roles rather than
 create new roles. If it needs internet access, paper search, citation checking,
 or live source verification, it should call `literature_reviewer`.
+
+`reviewer` enforces the five-round cap. On review round 5 it returns an
+explicit forced `PASS` and preserves unresolved issues in the review artifact.

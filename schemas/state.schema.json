@@ -9,6 +9,8 @@
     "trace_id",
     "phase",
     "compliance_mode",
+    "github_repository",
+    "review_cycle",
     "problem",
     "completed",
     "artifacts",
@@ -32,6 +34,72 @@
       ]
     },
     "compliance_mode": { "$ref": "#/$defs/compliance_mode" },
+    "github_repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "status", "visibility", "sync_policy"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "status": {
+          "type": "string",
+          "enum": ["not_requested", "planned", "linked", "created", "syncing", "disabled"]
+        },
+        "visibility": { "type": "string", "enum": ["private", "public"] },
+        "sync_policy": {
+          "type": "string",
+          "enum": ["off", "manual", "user_requested", "progress_milestones"]
+        },
+        "owner": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "remote_name": { "type": "string", "minLength": 1 },
+        "default_branch": { "type": "string", "minLength": 1 },
+        "current_branch": { "type": "string", "minLength": 1 },
+        "html_url": { "type": "string", "format": "uri" },
+        "last_sync_at": { "type": "string", "format": "date-time" },
+        "maintenance_log": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "at", "summary"],
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": ["created_repo", "linked_remote", "committed", "pushed", "opened_issue", "opened_pr", "updated_metadata"]
+              },
+              "at": { "type": "string", "format": "date-time" },
+              "ref": { "type": "string" },
+              "summary": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "review_cycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_round", "max_rounds", "force_pass_on_max_round", "forced_pass_used"],
+      "properties": {
+        "current_round": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "max_rounds": { "const": 5 },
+        "force_pass_on_max_round": { "const": true },
+        "forced_pass_used": { "type": "boolean" },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["round", "verdict", "review_result"],
+            "properties": {
+              "round": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "verdict": { "type": "string", "enum": ["PASS", "REVISE", "BLOCK"] },
+              "forced_pass": { "type": "boolean" },
+              "review_result": { "$ref": "#/$defs/artifact_ref" }
+            }
+          }
+        }
+      }
+    },
     "problem": {
       "type": "object",
       "additionalProperties": false,
@@ -203,6 +271,8 @@
         "revise_literature",
         "revise_execution",
         "revise_pdf",
+        "force_reviewer_pass",
+        "maintain_github_repository",
         "spawn_pdf_generator",
         "block_for_human",
         "return_final"

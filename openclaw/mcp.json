@@ -35,13 +35,22 @@
     "fallbackClient": "git",
     "defaultVisibility": "private",
     "requiresAuth": true,
+    "plannerOwnsLifecycle": true,
+    "createAndMaintainFromState": true,
     "setupGuide": "openclaw/github_setup.md",
-    "allowedPurpose": "repository lifecycle and maintenance only"
+    "allowedPurpose": "repository lifecycle and maintenance only",
+    "progressTriggers": [
+      "user_requests_repository",
+      "planner_state_enables_github_sync",
+      "research_milestone_completed",
+      "reviewer_forced_pass_has_unresolved_issues"
+    ]
   },
   "notes": [
     "The OpenClaw main/planner must not have direct internet access.",
     "Any internet, paper, citation, DOI, arXiv, or source-verification need must be delegated to role/literature_reviewer.",
     "GitHub access is allowed only for repository lifecycle operations, not general web research.",
+    "When GitHub sync is enabled, repository state should follow planner state and user instructions.",
     "Worker role MCP access should remain separate and narrower than needed for each role."
   ]
 }

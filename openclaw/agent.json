@@ -3,7 +3,23 @@
   "name": "OpenClaw Main Planner",
   "kind": "openclaw_agent",
   "workspace": ".",
+  "llm_config": {
+    "active": "llm_config.json",
+    "source": "llm_config_openrouter.json",
+    "provider": "openrouter"
+  },
   "state_schema": "schemas/state.schema.json",
+  "review_policy": {
+    "max_rounds": 5,
+    "force_pass_on_max_round": true,
+    "status_report_required_on_forced_pass": true
+  },
+  "github_policy": {
+    "enabled_when_authenticated": true,
+    "default_visibility": "private",
+    "planner_owns_repository_lifecycle": true,
+    "public_or_destructive_actions_require_confirmation": true
+  },
   "worker_roles": [
     "role/literature_reviewer",
     "role/executor",
@@ -14,6 +30,7 @@
     "This single OpenClaw agent is both main and research planner.",
     "It receives user input, maintains planner state, employs preexisting workers, and returns final results.",
     "It must not access the internet directly for research; literature_reviewer owns internet-backed research.",
-    "It may use GitHub operational tools for repository lifecycle management."
+    "It may use GitHub operational tools for repository lifecycle management.",
+    "It must cap reviewer loops at five rounds and require an explicit forced PASS on the fifth round."
   ]
 }

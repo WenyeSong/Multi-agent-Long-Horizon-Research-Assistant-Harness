@@ -7,8 +7,9 @@ literature-search tool.
 ## Current WSL Status
 
 - `git` is installed.
-- `gh` is not currently installed.
 - Global Git identity is already configured.
+- Verify whether this shell can see GitHub CLI with `command -v gh`.
+- If `gh auth status` succeeds, no further login step is needed.
 
 ## Install GitHub CLI
 
@@ -53,6 +54,9 @@ Verify:
 gh auth status
 ```
 
+Once authenticated, the OpenClaw planner may create and maintain repositories
+when the user asks or when `state.github_repository.enabled` is true.
+
 ## Common Repository Commands
 
 Create a private repo from the current folder:
@@ -83,3 +87,5 @@ git push -u origin main
 - Run a tracked-file secret scan before push
 - Never publish `.env`, API keys, local OpenClaw state, ignored task workspaces,
   or generated scratch files
+- Record repository status in `state.github_repository`
+- Reflect unresolved forced-PASS review findings in user status notes or GitHub issues

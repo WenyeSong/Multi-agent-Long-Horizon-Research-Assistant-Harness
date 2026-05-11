@@ -39,6 +39,8 @@ The architecture implied by these schemas is:
 - the OpenClaw planner does not access the internet directly.
 - internet-backed research is delegated to `role/literature_reviewer/`.
 - `pdf_generator` can run only after `reviewer` returns `PASS`.
+- reviewer loops are capped at 5 rounds; round 5 becomes an explicit forced
+  `PASS` with unresolved issues reported.
 - default compliance mode is `study_assistant`.
 
 ## Role Workspaces
@@ -62,8 +64,9 @@ The OpenClaw planner should employ these existing roles rather than create new
 ones.
 
 GitHub repository operations are allowed for the OpenClaw planner as operational
-repo maintenance, not as general internet research. See
-`openclaw/github_setup.md`.
+repo maintenance, not as general internet research. The planner owns repository
+creation and maintenance when user input or planner state enables GitHub sync.
+See `openclaw/github_setup.md`.
 
 ## Local Setup
 
@@ -75,6 +78,14 @@ cp .env.example .env
 
 Fill `.env` with local credentials, then create local model config files from
 the example as needed.
+
+For the current setup, use OpenRouter as the active local model config:
+
+```bash
+cp llm_config_openrouter.json llm_config.json
+```
+
+Both files are ignored by Git because they can contain API keys.
 
 ## Next Step
 

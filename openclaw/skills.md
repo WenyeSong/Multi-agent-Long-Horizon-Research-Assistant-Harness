@@ -9,6 +9,7 @@
 - Decision logging
 - GitHub repository lifecycle management
 - Git remote, branch, issue, and pull request maintenance
+- Review round-limit enforcement
 - Final user response
 
 ## Boundaries
@@ -20,6 +21,7 @@
 - No PDF generation before reviewer `PASS`
 - No public GitHub publication without explicit user confirmation
 - No GitHub use for literature search or citation verification
+- No silent reviewer loops beyond five rounds
 
 ## Delegation Rules
 
@@ -35,3 +37,14 @@
 - Confirm before creating public repositories
 - Confirm before destructive or irreversible repository actions
 - Keep ignored files and local task workspaces out of GitHub
+- Create or maintain repositories when user input or planner state enables it
+- Use commits, issues, branches, and pull requests to reflect research progress
+- Convert unresolved forced-PASS review findings into visible status notes or issues
+
+## Review Round Rules
+
+- Track reviewer rounds in `state.review_cycle.current_round`
+- Maximum reviewer rounds is 5
+- Rounds 1-4 may return `REVISE` and route work back to planner or workers
+- At round 5, summarize current status and unresolved issues, then require reviewer `PASS`
+- Forced PASS must be explicit with `round_limit.forced_pass=true`
