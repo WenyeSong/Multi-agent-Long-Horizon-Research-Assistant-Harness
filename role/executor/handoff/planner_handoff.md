@@ -1,4 +1,4 @@
-﻿# Executor Handoff For Planner Agent
+# Executor Handoff For Planner Agent
 
 This document is the integration handoff for any planner-side agent or teammate that needs to call the executor.
 
@@ -143,7 +143,7 @@ Planner should allocate the workspace before calling executor.
 Recommended layout:
 
 ```text
-execution_runs/
+role/executor/workspaces/
   <request_id>/
     inputs/
     work/
@@ -343,4 +343,5 @@ Executor only performs bounded execution inside workspace.write_path, generates 
 
 Executor must not browse, spawn agents, call reviewer/PDF generator, decide the global research route, or write outside workspace.write_path.
 ```
+
 

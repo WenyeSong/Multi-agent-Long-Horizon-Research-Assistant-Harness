@@ -12,6 +12,7 @@ from typing import Any
 
 ROLE = "executor"
 PURPOSE = "Design experiments, run reproducibility checks, and return execution artifacts."
+ROLE_DIR = Path(__file__).resolve().parent
 SCHEMA_REFS = [
     "schemas/execution_request.schema.json",
     "schemas/execution_result.schema.json",
@@ -21,7 +22,7 @@ SCHEMA_REFS = [
 def load_request(path: str | None) -> dict[str, Any]:
     if not path:
         return {}
-    with Path(path).open("r", encoding="utf-8") as handle:
+    with Path(path).open("r", encoding="utf-8-sig") as handle:
         data = json.load(handle)
     if not isinstance(data, dict):
         raise ValueError("request JSON must be an object")
@@ -89,10 +90,10 @@ def resolve_workspace(write_path: str) -> Path:
     path = Path(write_path)
     if not path.is_absolute():
         path = Path.cwd() / path
-    root = Path.cwd().resolve()
+    root = ROLE_DIR.resolve()
     resolved = path.resolve()
     if root != resolved and root not in resolved.parents:
-        raise ValueError(f"workspace.write_path must stay inside repository root: {write_path}")
+        raise ValueError(f"workspace.write_path must stay inside role/executor: {write_path}")
     return resolved
 
 

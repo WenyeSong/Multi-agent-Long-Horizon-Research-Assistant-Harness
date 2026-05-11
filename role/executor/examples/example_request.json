@@ -12,24 +12,24 @@
     ]
   },
   "workspace": {
-    "root": "execution_runs/exec_001",
+    "root": "role/executor/workspaces/exec_001",
     "read_paths": [
-      "execution_runs/exec_001/inputs/baseline_optimizer.py",
-      "execution_runs/exec_001/inputs/dataset.csv"
+      "role/executor/workspaces/exec_001/inputs/baseline_optimizer.py",
+      "role/executor/workspaces/exec_001/inputs/dataset.csv"
     ],
-    "write_path": "execution_runs/exec_001"
+    "write_path": "role/executor/workspaces/exec_001"
   },
   "inputs": [
     {
       "artifact_id": "baseline_optimizer",
-      "path": "execution_runs/exec_001/inputs/baseline_optimizer.py",
+      "path": "role/executor/workspaces/exec_001/inputs/baseline_optimizer.py",
       "kind": "code",
       "description": "Planner-provided baseline optimiser implementation.",
       "read_only": true
     },
     {
       "artifact_id": "dataset_main",
-      "path": "execution_runs/exec_001/inputs/dataset.csv",
+      "path": "role/executor/workspaces/exec_001/inputs/dataset.csv",
       "kind": "dataset",
       "description": "Planner-approved dataset for this execution request.",
       "read_only": true
@@ -80,3 +80,4 @@
   ],
   "tool_policy_ref": "role/executor/docs/tool_policy.md"
 }
+
