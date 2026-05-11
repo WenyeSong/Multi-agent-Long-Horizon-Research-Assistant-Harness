@@ -1,0 +1,7 @@
+{
+  "mcpServers": {},
+  "notes": [
+    "Add read-only validation MCP/tool access here later.",
+    "No write-code or spawn tools should be configured for this role."
+  ]
+}

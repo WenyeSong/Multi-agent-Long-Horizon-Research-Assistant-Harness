@@ -40,6 +40,21 @@ The architecture implied by these schemas is:
 - `pdf_generator` can run only after `reviewer` returns `PASS`.
 - default compliance mode is `study_assistant`.
 
+## Role Workspaces
+
+`role/` contains concise, problem-agnostic workspaces for the non-OpenClaw
+roles:
+
+- `role/research_planner/`
+- `role/literature_reviewer/`
+- `role/executor/`
+- `role/reviewer/`
+- `role/pdf_generator/`
+
+Each role folder has a runnable Python module, `system_prompt.md`, `skills.md`,
+and `mcp.json`. The modules are intentionally small scaffolds so they can be
+executed by OpenClaw roles and replaced later.
+
 ## Local Setup
 
 ```bash
