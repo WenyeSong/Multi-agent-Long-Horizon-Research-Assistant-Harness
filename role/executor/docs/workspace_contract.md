@@ -13,7 +13,7 @@ Each executor request must provide:
 ## Recommended Layout
 
 ```text
-execution_runs/
+role/executor/workspaces/
   <request_id>/
     inputs/          # optional copied or linked read-only inputs
     work/            # scratch code and intermediate files
@@ -94,3 +94,4 @@ The executor should record:
 ## Artifact Manifest
 
 The executor should write `artifacts.json` when it produces more than the three core JSON files. The manifest should list figures, tables, logs, source files, and notes with stable ids, paths, formats, roles, and short descriptions.
+

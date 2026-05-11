@@ -58,7 +58,7 @@ Planner should create or allocate the run workspace before invocation.
 Recommended planner-created layout:
 
 ```text
-execution_runs/
+role/executor/workspaces/
   <request_id>/
     inputs/
     work/
@@ -105,3 +105,4 @@ Before formal agent connection, confirm:
 - `example_response.json` contains all fields planner needs.
 - Tool policy can be enforced by the chosen runtime.
 - Workspace paths are either absolute or resolved consistently by both sides.
+

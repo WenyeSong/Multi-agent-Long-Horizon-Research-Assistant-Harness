@@ -5,7 +5,7 @@
   "artifacts": [
     {
       "artifact_id": "results_main",
-      "path": "execution_runs/exec_001/results.json",
+      "path": "role/executor/workspaces/exec_001/results.json",
       "kind": "results",
       "description": "Main metrics, baseline result, attempted configurations, and best observed configuration.",
       "format": "json",
@@ -14,7 +14,7 @@
     },
     {
       "artifact_id": "tests_main",
-      "path": "execution_runs/exec_001/tests.json",
+      "path": "role/executor/workspaces/exec_001/tests.json",
       "kind": "tests",
       "description": "Validation checks mapped to planner success criteria.",
       "format": "json",
@@ -23,7 +23,7 @@
     },
     {
       "artifact_id": "environment_main",
-      "path": "execution_runs/exec_001/environment.json",
+      "path": "role/executor/workspaces/exec_001/environment.json",
       "kind": "environment",
       "description": "Python, package, platform, and seed metadata.",
       "format": "json",
@@ -32,7 +32,7 @@
     },
     {
       "artifact_id": "artifacts_manifest",
-      "path": "execution_runs/exec_001/artifacts.json",
+      "path": "role/executor/workspaces/exec_001/artifacts.json",
       "kind": "metadata",
       "description": "Manifest of generated executor artifacts.",
       "format": "json",
@@ -41,7 +41,7 @@
     },
     {
       "artifact_id": "fig_attempt_02_objective_curve",
-      "path": "execution_runs/exec_001/figures/attempt_02_objective_curve.png",
+      "path": "role/executor/workspaces/exec_001/figures/attempt_02_objective_curve.png",
       "kind": "figure",
       "description": "Diagnostic curve for the best observed attempt.",
       "format": "png",
@@ -50,7 +50,7 @@
     },
     {
       "artifact_id": "table_all_attempts_summary",
-      "path": "execution_runs/exec_001/tables/all_attempts_summary.csv",
+      "path": "role/executor/workspaces/exec_001/tables/all_attempts_summary.csv",
       "kind": "table",
       "description": "Rectangular summary of baseline and attempted parameter settings.",
       "format": "csv",
@@ -59,7 +59,7 @@
     },
     {
       "artifact_id": "notes_main",
-      "path": "execution_runs/exec_001/notes.md",
+      "path": "role/executor/workspaces/exec_001/notes.md",
       "kind": "notes",
       "description": "Short interpretation notes and limitations.",
       "format": "md",
@@ -121,7 +121,7 @@
     "sessions_spawned": false,
     "external_post_performed": false,
     "write_scope_respected": true,
-    "notes": "All writes stayed under execution_runs/exec_001."
+    "notes": "All writes stayed under role/executor/workspaces/exec_001."
   },
   "limitations": [
     "Small sweep only; planner should decide whether broader search is needed.",
@@ -132,3 +132,4 @@
     "Ask reviewer to inspect the diagnostic figure if this result will be used in the final report."
   ]
 }
+
