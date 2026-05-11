@@ -1,7 +1,25 @@
 {
   "mcpServers": {},
+  "toolPolicy": {
+    "allow": [
+      "read",
+      "write",
+      "sessions_spawn",
+      "sessions_history",
+      "session_status"
+    ],
+    "deny": [
+      "browser",
+      "web_search",
+      "http_fetch",
+      "external_source_lookup",
+      "exec_unrestricted",
+      "external_post"
+    ]
+  },
   "notes": [
-    "Add OpenClaw main/planner MCP servers here later.",
-    "Worker role MCP access should remain separate."
+    "The OpenClaw main/planner must not have direct internet access.",
+    "Any internet, paper, citation, DOI, arXiv, or source-verification need must be delegated to role/literature_reviewer.",
+    "Worker role MCP access should remain separate and narrower than needed for each role."
   ]
 }

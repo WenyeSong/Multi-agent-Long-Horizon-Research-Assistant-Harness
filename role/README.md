@@ -30,3 +30,7 @@ python role/literature_reviewer/literature_reviewer.py \
 
 The Python modules are scaffolds. They do not solve a specific problem; they
 load a JSON request, return a role envelope, and make the workspace replaceable.
+
+The OpenClaw planner should employ these existing worker roles rather than
+create new roles. If it needs internet access, paper search, citation checking,
+or live source verification, it should call `literature_reviewer`.

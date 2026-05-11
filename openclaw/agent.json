@@ -12,6 +12,7 @@
   ],
   "notes": [
     "This single OpenClaw agent is both main and research planner.",
-    "It receives user input, maintains planner state, spawns workers, and returns final results."
+    "It receives user input, maintains planner state, employs preexisting workers, and returns final results.",
+    "It must not access the internet directly; literature_reviewer owns internet-backed research."
   ]
 }

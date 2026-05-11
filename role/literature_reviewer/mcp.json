@@ -1,6 +1,23 @@
 {
   "mcpServers": {},
+  "toolPolicy": {
+    "allow": [
+      "browser",
+      "web_search",
+      "http_fetch",
+      "read",
+      "write"
+    ],
+    "deny": [
+      "exec",
+      "process",
+      "sessions_spawn",
+      "apply_patch",
+      "external_post"
+    ]
+  },
   "notes": [
+    "This role is the internet boundary for the OpenClaw planner.",
     "Add browser or scholarly-search MCP access here later.",
     "No execution or spawn tools should be configured for this role."
   ]

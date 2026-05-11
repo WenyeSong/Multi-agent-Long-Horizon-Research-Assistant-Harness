@@ -36,6 +36,8 @@ The architecture implied by these schemas is:
 - the current OpenClaw agent is both `main` and the research planner.
 - workers do not talk to each other.
 - all worker outputs return to the OpenClaw planner as JSON artifact refs.
+- the OpenClaw planner does not access the internet directly.
+- internet-backed research is delegated to `role/literature_reviewer/`.
 - `pdf_generator` can run only after `reviewer` returns `PASS`.
 - default compliance mode is `study_assistant`.
 
@@ -55,6 +57,9 @@ worker roles:
 Each role folder has a runnable Python module, `system_prompt.md`, `skills.md`,
 and `mcp.json`. The modules are intentionally small scaffolds so they can be
 executed by OpenClaw roles and replaced later.
+
+The OpenClaw planner should employ these existing roles rather than create new
+ones.
 
 ## Local Setup
 
