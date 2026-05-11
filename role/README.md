@@ -1,15 +1,17 @@
 # Role Workspaces
 
-Each folder is an independent, problem-agnostic agent workspace that OpenClaw
+Each folder is an independent, problem-agnostic worker workspace that OpenClaw
 roles can execute or adapt.
 
-Included roles:
+Included executable worker roles:
 
-- `research_planner`
 - `literature_reviewer`
 - `executor`
 - `reviewer`
 - `pdf_generator`
+
+`research_planner` is not a Python worker role. It is an OpenClaw-native
+planner under `openclaw/research_planner/`.
 
 Each role contains:
 
@@ -21,9 +23,9 @@ Each role contains:
 Example:
 
 ```bash
-python role/research_planner/research_planner.py \
+python role/literature_reviewer/literature_reviewer.py \
   --request projects/example/input/request.json \
-  --output /tmp/research_planner_result.json
+  --output /tmp/literature_reviewer_result.json
 ```
 
 The Python modules are scaffolds. They do not solve a specific problem; they

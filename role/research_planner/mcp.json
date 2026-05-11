@@ -1,7 +1,0 @@
-{
-  "mcpServers": {},
-  "notes": [
-    "Add planner-specific MCP servers here later.",
-    "Worker roles should not inherit MCP access by default."
-  ]
-}

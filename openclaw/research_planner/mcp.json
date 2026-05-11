@@ -1,0 +1,7 @@
+{
+  "mcpServers": {},
+  "notes": [
+    "Add OpenClaw planner MCP servers here later.",
+    "Worker role MCP access should remain separate."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "research-planner",
+  "name": "Research Planner",
+  "kind": "openclaw_subagent",
+  "workspace": "openclaw/research_planner",
+  "state_schema": "schemas/state.schema.json",
+  "worker_roles": [
+    "role/literature_reviewer",
+    "role/executor",
+    "role/reviewer",
+    "role/pdf_generator"
+  ],
+  "notes": [
+    "This is an OpenClaw planner role, not a standalone Python worker.",
+    "It should spawn worker roles and aggregate their JSON artifacts."
+  ]
+}
