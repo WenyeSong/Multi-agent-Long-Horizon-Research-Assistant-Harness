@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/execution_result.schema.json",
+  "title": "ExecutionResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "status",
+    "summary",
+    "artifacts",
+    "validation",
+    "attempts",
+    "policy_observance"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["succeeded", "failed", "partial", "rejected", "blocked"]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Concise execution outcome for the planner."
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_id", "path", "kind"],
+        "properties": {
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "kind": {
+            "type": "string",
+            "enum": ["results", "tests", "environment", "figure", "table", "log", "source", "notes", "metadata", "other"]
+          },
+          "description": { "type": "string" },
+          "format": {
+            "type": "string",
+            "description": "File format such as json, md, png, svg, csv, txt, or py."
+          },
+          "role": {
+            "type": "string",
+            "description": "How the planner should use this artifact, such as primary_result, diagnostic, audit, or supporting."
+          },
+          "created_by_executor": { "type": "boolean", "const": true }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overall", "checks"],
+      "properties": {
+        "overall": {
+          "type": "string",
+          "enum": ["passed", "failed", "partial", "not_run"]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["criterion_id", "status", "evidence"],
+            "properties": {
+              "criterion_id": { "type": "string", "minLength": 1 },
+              "status": {
+                "type": "string",
+                "enum": ["passed", "failed", "skipped", "not_applicable"]
+              },
+              "evidence": { "type": "string", "minLength": 1 },
+              "metric_value": {},
+              "artifact_refs": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["attempt_id", "status", "description"],
+        "properties": {
+          "attempt_id": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["succeeded", "failed", "abandoned"]
+          },
+          "description": { "type": "string", "minLength": 1 },
+          "failure_reason": { "type": "string" },
+          "artifact_refs": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "policy_observance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["browser_used", "sessions_spawned", "external_post_performed", "write_scope_respected"],
+      "properties": {
+        "browser_used": { "type": "boolean", "const": false },
+        "sessions_spawned": { "type": "boolean", "const": false },
+        "external_post_performed": { "type": "boolean", "const": false },
+        "write_scope_respected": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "recommended_planner_next_steps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Executor may suggest local follow-up checks, but must not decide the global research route."
+    }
+  }
+}

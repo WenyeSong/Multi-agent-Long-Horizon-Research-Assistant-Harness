@@ -11,7 +11,10 @@ from typing import Any
 
 ROLE = "executor"
 PURPOSE = "Design experiments, run reproducibility checks, and return execution artifacts."
-SCHEMA_REFS = ["schemas/execution_result.schema.json"]
+SCHEMA_REFS = [
+    "schemas/execution_request.schema.json",
+    "schemas/execution_result.schema.json",
+]
 
 
 def load_request(path: str | None) -> dict[str, Any]:
@@ -22,13 +25,14 @@ def load_request(path: str | None) -> dict[str, Any]:
 
 
 def build_response(request: dict[str, Any]) -> dict[str, Any]:
+    """Return a lightweight readiness response until the runtime is implemented."""
     return {
         "role": ROLE,
         "status": "ready",
         "purpose": PURPOSE,
         "schema_refs": SCHEMA_REFS,
-        "request_trace_id": request.get("trace_id"),
-        "next_step": "implement sandboxed research-support execution here"
+        "request_trace_id": request.get("trace_id") or request.get("request_id"),
+        "next_step": "implement sandboxed research-support execution here",
     }
 
 
