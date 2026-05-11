@@ -1,0 +1,10 @@
+*
+!.gitignore
+!inbox/
+!inbox/.gitkeep
+!scratch/
+!scratch/.gitkeep
+!outbox/
+!outbox/.gitkeep
+!logs/
+!logs/.gitkeep

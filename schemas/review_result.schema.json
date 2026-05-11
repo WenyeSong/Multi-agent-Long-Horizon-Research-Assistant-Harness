@@ -2,226 +2,226 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/multi-agent-hackathon/review_result.schema.json",
   "title": "ReviewResult",
-  "description": "Reviewer gate result. Only PASS permits report_spec/pdf generation.",
+  "description": "Reviewer judgment before PDF generation. The LLM makes the review decision; scripts provide preflight, provenance, optional verification, and scope evidence.",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "trace_id",
-    "review_round",
-    "verdict",
-    "reviewed_artifact_refs",
+    "task_id",
+    "state_version",
+    "decision",
+    "confidence",
+    "route_suggestion",
+    "summary",
     "blocking_issues",
-    "non_blocking_issues",
-    "pass_checks",
-    "compliance_risk",
-    "round_limit",
-    "next_action"
+    "major_issues",
+    "advisory_notes",
+    "checked_artifacts",
+    "requirement_map_summary",
+    "verification",
+    "scope_audit",
+    "pass_token_issued"
   ],
   "properties": {
-    "trace_id": { "$ref": "#/$defs/trace_id" },
-    "review_round": { "type": "integer", "minimum": 1, "maximum": 5 },
-    "verdict": { "type": "string", "enum": ["PASS", "REVISE", "BLOCK"] },
-    "reviewed_artifact_refs": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "$ref": "#/$defs/artifact_ref" }
+    "task_id": { "$ref": "#/$defs/id" },
+    "trace_id": { "$ref": "#/$defs/id" },
+    "review_id": { "$ref": "#/$defs/id" },
+    "generated_at": { "type": "string", "minLength": 1 },
+    "reviewer_model": { "type": "string", "minLength": 1 },
+    "state_version": { "type": "string", "minLength": 1 },
+    "decision": {
+      "type": "string",
+      "enum": ["PASS", "REVISE", "REPLAN", "BLOCK", "INCONCLUSIVE"]
     },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "route_suggestion": {
+      "type": "string",
+      "enum": [
+        "planner",
+        "literature_reviewer",
+        "executor",
+        "main",
+        "pdf_generator",
+        "none"
+      ]
+    },
+    "summary": { "type": "string", "minLength": 1 },
     "blocking_issues": {
       "type": "array",
-      "items": { "$ref": "#/$defs/review_issue_with_target" }
+      "items": { "$ref": "#/$defs/issue" }
     },
-    "non_blocking_issues": {
+    "major_issues": {
       "type": "array",
-      "items": { "$ref": "#/$defs/review_issue" }
+      "items": { "$ref": "#/$defs/issue" }
     },
-    "pass_checks": {
+    "advisory_notes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issue" }
+    },
+    "checked_artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/checked_artifact" }
+    },
+    "requirement_map_summary": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "citations_traceable",
-        "ten_papers_summarized_without_obvious_hallucination",
-        "math_matches_problem",
-        "results_reproducible",
-        "figures_labeled",
-        "code_text_consistent",
-        "not_packaged_as_student_submission",
-        "pdf_adds_no_unreviewed_claims"
+        "explicit_required_checked",
+        "implied_required_checked",
+        "optional_not_blocking"
       ],
       "properties": {
-        "citations_traceable": { "type": "boolean" },
-        "ten_papers_summarized_without_obvious_hallucination": { "type": "boolean" },
-        "math_matches_problem": { "type": "boolean" },
-        "results_reproducible": { "type": "boolean" },
-        "figures_labeled": { "type": "boolean" },
-        "code_text_consistent": { "type": "boolean" },
-        "not_packaged_as_student_submission": { "type": "boolean" },
-        "pdf_adds_no_unreviewed_claims": { "type": "boolean" }
-      }
-    },
-    "compliance_risk": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["level", "reason"],
-      "properties": {
-        "level": { "type": "string", "enum": ["low", "medium", "high"] },
-        "reason": { "type": "string", "minLength": 1 }
-      }
-    },
-    "round_limit": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "max_rounds",
-        "round_reached",
-        "forced_pass",
-        "unresolved_issues_summary"
-      ],
-      "properties": {
-        "max_rounds": { "const": 5 },
-        "round_reached": { "type": "integer", "minimum": 1, "maximum": 5 },
-        "forced_pass": { "type": "boolean" },
-        "status_message": { "type": "string" },
-        "unresolved_issues_summary": {
+        "explicit_required_checked": {
           "type": "array",
-          "items": { "$ref": "#/$defs/review_issue_with_target" }
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "implied_required_checked": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "optional_not_blocking": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
         }
       }
     },
-    "next_action": {
-      "type": "string",
-      "enum": ["return_to_planner", "block_for_human"]
-    }
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ran_commands", "status", "notes"],
+      "properties": {
+        "ran_commands": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/command_result" }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run", "partial"]
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "scope_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "notes"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["clean", "warning", "violation"]
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "pass_token_issued": { "type": "boolean" }
   },
   "allOf": [
     {
-      "if": {
-        "required": ["verdict", "round_limit"],
-        "properties": {
-          "verdict": { "const": "PASS" },
-          "round_limit": {
-            "required": ["forced_pass"],
-            "properties": {
-              "forced_pass": { "const": false }
-            }
-          }
-        }
-      },
+      "if": { "properties": { "decision": { "const": "PASS" } } },
       "then": {
         "properties": {
           "blocking_issues": { "maxItems": 0 },
-          "next_action": { "const": "return_to_planner" },
-          "pass_checks": {
-            "properties": {
-              "citations_traceable": { "const": true },
-              "ten_papers_summarized_without_obvious_hallucination": { "const": true },
-              "math_matches_problem": { "const": true },
-              "results_reproducible": { "const": true },
-              "figures_labeled": { "const": true },
-              "code_text_consistent": { "const": true },
-              "not_packaged_as_student_submission": { "const": true },
-              "pdf_adds_no_unreviewed_claims": { "const": true }
-            }
-          }
+          "route_suggestion": { "const": "none" },
+          "pass_token_issued": { "const": true }
         }
       }
     },
     {
-      "if": {
-        "required": ["verdict", "round_limit"],
-        "properties": {
-          "verdict": { "const": "PASS" },
-          "round_limit": {
-            "required": ["forced_pass"],
-            "properties": {
-              "forced_pass": { "const": true }
-            }
-          }
-        }
-      },
+      "if": { "properties": { "decision": { "const": "BLOCK" } } },
       "then": {
         "properties": {
-          "blocking_issues": { "maxItems": 0 },
-          "next_action": { "const": "return_to_planner" },
-          "round_limit": {
-            "properties": {
-              "max_rounds": { "const": 5 },
-              "round_reached": { "const": 5 },
-              "forced_pass": { "const": true }
-            }
-          }
+          "route_suggestion": { "enum": ["main", "planner"] }
         }
       }
     },
     {
-      "if": { "properties": { "verdict": { "const": "BLOCK" } } },
+      "if": { "properties": { "decision": { "const": "REPLAN" } } },
       "then": {
         "properties": {
-          "next_action": { "const": "block_for_human" }
+          "route_suggestion": { "const": "planner" }
         }
       }
     }
   ],
   "$defs": {
-    "trace_id": {
+    "id": {
       "type": "string",
       "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,127}$"
     },
     "artifact_ref": {
       "type": "string",
-      "minLength": 1,
-      "pattern": "^(projects/|/projects/|\\./projects/).+"
+      "minLength": 1
     },
-    "review_issue": {
+    "checked_artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "message"],
+      "required": ["path", "sha256"],
       "properties": {
-        "type": {
+        "path": { "$ref": "#/$defs/artifact_ref" },
+        "sha256": {
           "type": "string",
-          "enum": [
-            "math_correctness",
-            "literature_traceability",
-            "evidence_quality",
-            "reproducibility",
-            "figure_quality",
-            "consistency",
-            "compliance",
-            "presentation"
-          ]
+          "pattern": "^[a-fA-F0-9]{64}$"
         },
-        "message": { "type": "string", "minLength": 1 }
+        "role": { "type": "string" },
+        "kind": { "type": "string" }
       }
     },
-    "review_issue_with_target": {
+    "issue": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "severity", "message", "send_back_to"],
+      "required": [
+        "severity",
+        "owner",
+        "evidence",
+        "reason",
+        "recommended_fix"
+      ],
       "properties": {
-        "type": {
+        "severity": {
           "type": "string",
-          "enum": [
-            "math_correctness",
-            "literature_traceability",
-            "evidence_quality",
-            "reproducibility",
-            "figure_quality",
-            "consistency",
-            "compliance",
-            "presentation"
-          ]
+          "enum": ["blocking", "major", "advisory"]
         },
-        "severity": { "type": "string", "enum": ["low", "medium", "high"] },
-        "message": { "type": "string", "minLength": 1 },
-        "send_back_to": {
+        "owner": {
           "type": "string",
           "enum": [
             "planner",
             "literature_reviewer",
             "executor",
-            "pdf_generator",
-            "human"
+            "main",
+            "pdf_generator"
           ]
+        },
+        "evidence": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "recommended_fix": { "type": "string", "minLength": 1 },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
         }
+      }
+    },
+    "command_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "status"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "cwd": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "timeout", "skipped"]
+        },
+        "exit_code": { "type": ["integer", "null"] },
+        "stdout_tail": { "type": "string" },
+        "stderr_tail": { "type": "string" }
       }
     }
   }

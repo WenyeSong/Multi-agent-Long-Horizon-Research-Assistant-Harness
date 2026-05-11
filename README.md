@@ -38,7 +38,8 @@ The architecture implied by these schemas is:
 - all worker outputs return to the OpenClaw planner as JSON artifact refs.
 - the OpenClaw planner does not access the internet directly.
 - internet-backed research is delegated to `role/literature_reviewer/`.
-- `pdf_generator` can run only after `reviewer` returns `PASS`.
+- `pdf_generator` can run only after `reviewer` returns `PASS` and issues a
+  pass token bound to reviewed artifact hashes.
 - reviewer loops are capped at 5 rounds; round 5 becomes an explicit forced
   `PASS` with unresolved issues reported.
 - default compliance mode is `study_assistant`.
@@ -57,8 +58,12 @@ worker roles:
 - `role/pdf_generator/`
 
 Each role folder has a runnable Python module, `system_prompt.md`, `skills.md`,
-and `mcp.json`. The modules are intentionally small scaffolds so they can be
+and `mcp.json`. Most modules are intentionally small scaffolds so they can be
 executed by OpenClaw roles and replaced later.
+
+The reviewer role is now more concrete: it uses LLM-led judgment plus lightweight
+scripts for packet preflight, artifact hashing, optional executor verification,
+scope audit, review logging, route suggestion, and pass-token issuance.
 
 The OpenClaw planner should employ these existing roles rather than create new
 ones.
@@ -89,5 +94,7 @@ Both files are ignored by Git because they can contain API keys.
 
 ## Next Step
 
-After these schemas are reviewed, add OpenClaw agent configuration and system
-prompts that enforce the schema contracts and tool boundaries.
+Next integration step: wire the planner to create
+`role/reviewer/workspace/inbox/review_packet.json`, call the reviewer role, and
+only create `report_spec.json` when `review_report.json` has `decision == PASS`
+and `pass_token.json` exists.
