@@ -34,13 +34,13 @@ correctly, and compliant enough for `pdf_generator`.
 
 ## Scripts
 
-- `../../scripts/review_preflight.py`
-- `../../scripts/build_artifact_manifest.py`
-- `../../scripts/scope_audit.py`
-- `../../scripts/run_optional_verify.py`
-- `../../scripts/review_record.py`
-- `../../scripts/issue_pass_token.py`
-- `../../scripts/route_from_review.py`
+- `scripts/review_preflight.py`
+- `scripts/build_artifact_manifest.py`
+- `scripts/scope_audit.py`
+- `scripts/run_optional_verify.py`
+- `scripts/review_record.py`
+- `scripts/issue_pass.py`
+- `scripts/route_from_review.py`
 
 ## Boundaries
 

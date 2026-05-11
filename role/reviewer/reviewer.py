@@ -14,13 +14,14 @@ from pathlib import Path
 from typing import Any
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = REPO_ROOT / "scripts"
+ROLE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = ROLE_DIR.parents[1]
+SCRIPTS_DIR = ROLE_DIR / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from build_artifact_manifest import build_manifest
-from issue_pass_token import issue_pass_token
+from issue_pass import issue_pass_token
 from review_preflight import run_preflight
 from review_record import append_review_record
 from review_utils import (
@@ -45,9 +46,8 @@ DEFAULT_MODEL = "gpt-5.4-nano"
 
 
 def read_role_text() -> str:
-    role_dir = Path(__file__).resolve().parent
-    parts = [(role_dir / "system_prompt.md").read_text(encoding="utf-8")]
-    for path in sorted((role_dir / "references").glob("*.md")):
+    parts = [(ROLE_DIR / "system_prompt.md").read_text(encoding="utf-8")]
+    for path in sorted((ROLE_DIR / "references").glob("*.md")):
         parts.append(f"\n\n# Reference: {path.name}\n" + path.read_text(encoding="utf-8"))
     return "\n".join(parts)
 
@@ -93,6 +93,10 @@ def build_llm_context(
             "scope_audit": scope_audit,
         },
         "artifact_excerpts": artifact_excerpts(manifest, repo_root, max_chars=max_chars),
+        "json_output_instruction": (
+            "Return exactly one JSON object matching required_json_shape. "
+            "Do not include Markdown, prose, analysis, or code fences."
+        ),
         "required_json_shape": {
             "task_id": "string",
             "state_version": "string",
@@ -123,7 +127,11 @@ def extract_json_object(text: str) -> dict[str, Any]:
         end = cleaned.rfind("}")
         if start >= 0 and end > start:
             cleaned = cleaned[start : end + 1]
-    payload = json.loads(cleaned)
+    try:
+        payload = json.loads(cleaned)
+    except json.JSONDecodeError as exc:
+        preview = text.strip().replace("\n", " ")[:500]
+        raise ValueError(f"LLM response was not valid JSON. Preview: {preview}") from exc
     if not isinstance(payload, dict):
         raise ValueError("LLM response JSON root is not an object")
     return payload

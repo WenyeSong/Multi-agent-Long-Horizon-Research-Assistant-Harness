@@ -90,7 +90,8 @@ are explicit or necessary for a core claim.
 
 ## Output
 
-Write:
+When acting through `reviewer.py`, return exactly one JSON object and no
+Markdown, prose, or code fences. The runner will write that object to:
 
 - `role/reviewer/workspace/outbox/review_report.json`
 - `role/reviewer/workspace/outbox/review_report.md`
