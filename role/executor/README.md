@@ -32,4 +32,29 @@ docs/
 
 ## Current Status
 
-This is still a design and integration scaffold. The runtime does not yet perform real experiments. The next implementation step is to make `executor.py` validate an execution request and emit a schema-valid placeholder execution result.
+The runtime now supports an LLM-backed MVP loop:
+
+```text
+planner request -> LLM/fallback generates experiment code -> executor runs code -> artifacts + response
+```
+
+Run without requiring network credentials:
+
+```powershell
+py -3 role\executor\executor.py --request role\executor\examples\example_request.json --output role\executor\workspaces\exec_001\executor_response.json --llm off
+```
+
+Run with LLM generation when credentials are available:
+
+```powershell
+py -3 role\executor\executor.py --request role\executor\examples\example_request.json --output role\executor\workspaces\exec_001\executor_response.json --llm auto
+```
+
+`--llm auto` reads local config or environment variables. Do not commit real API keys. Use `role/executor/llm_config.example.json` as a template for a local ignored `role/executor/llm_config.json`, or set `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `EXECUTOR_LLM_API_KEY`.
+
+When using an OpenAI key directly, set `EXECUTOR_LLM_MODEL` if you want a specific model:
+
+```powershell
+$env:OPENAI_API_KEY="..."
+$env:EXECUTOR_LLM_MODEL="gpt-4o-mini"
+```

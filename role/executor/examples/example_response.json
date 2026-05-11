@@ -1,13 +1,13 @@
 {
   "request_id": "exec_001",
   "status": "succeeded",
-  "summary": "Toy executor runtime completed. The dataset was read and summary artifacts were written for planner integration testing.",
+  "summary": "Executor generated experiment code, ran it, produced a figure/table, and wrote structured artifacts.",
   "artifacts": [
     {
       "artifact_id": "results_main",
       "path": "role/executor/workspaces/exec_001/results.json",
       "kind": "results",
-      "description": "Toy dataset summary metrics.",
+      "description": "Generated-code experiment metrics.",
       "format": "json",
       "role": "primary_result",
       "created_by_executor": true
@@ -40,19 +40,37 @@
       "created_by_executor": true
     },
     {
-      "artifact_id": "fig_attempt_01_toy_dataset_diagnostic",
-      "path": "role/executor/workspaces/exec_001/figures/attempt_01_toy_dataset_diagnostic.svg",
+      "artifact_id": "llm_plan",
+      "path": "role/executor/workspaces/exec_001/work/llm_plan.json",
+      "kind": "metadata",
+      "description": "LLM or fallback execution plan.",
+      "format": "json",
+      "role": "audit",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "source_generated_experiment",
+      "path": "role/executor/workspaces/exec_001/work/generated_experiment.py",
+      "kind": "source",
+      "description": "Generated experiment code executed by the executor.",
+      "format": "py",
+      "role": "audit",
+      "created_by_executor": true
+    },
+    {
+      "artifact_id": "fig_attempt_01_generated_diagnostic",
+      "path": "role/executor/workspaces/exec_001/figures/attempt_01_generated_diagnostic.svg",
       "kind": "figure",
-      "description": "Toy dataset diagnostic figure.",
+      "description": "Generated experiment diagnostic figure.",
       "format": "svg",
       "role": "diagnostic",
       "created_by_executor": true
     },
     {
-      "artifact_id": "table_attempt_01_summary_metrics",
-      "path": "role/executor/workspaces/exec_001/tables/attempt_01_summary_metrics.csv",
+      "artifact_id": "table_attempt_01_generated_metrics",
+      "path": "role/executor/workspaces/exec_001/tables/attempt_01_generated_metrics.csv",
       "kind": "table",
-      "description": "Toy dataset summary metrics table.",
+      "description": "Generated experiment metrics table.",
       "format": "csv",
       "role": "supporting",
       "created_by_executor": true
@@ -79,18 +97,18 @@
       {
         "criterion_id": "crit_metric_threshold",
         "status": "passed",
-        "evidence": "Toy dataset objective_value max is greater than its mean baseline.",
+        "evidence": "Generated experiment reported a best objective value greater than or equal to its mean baseline.",
         "metric_value": {
           "baseline": 0.64125,
           "best_attempt": 0.83
         },
-        "artifact_refs": ["results_main", "table_attempt_01_summary_metrics"]
+        "artifact_refs": ["results_main", "table_attempt_01_generated_metrics"]
       },
       {
         "criterion_id": "crit_diagnostic_figure",
         "status": "passed",
         "evidence": "One diagnostic figure was written under figures/.",
-        "artifact_refs": ["fig_attempt_01_toy_dataset_diagnostic"]
+        "artifact_refs": ["fig_attempt_01_generated_diagnostic"]
       }
     ]
   },
@@ -98,8 +116,8 @@
     {
       "attempt_id": "attempt_01",
       "status": "succeeded",
-      "description": "Read the toy dataset and created summary metrics, a table, and a diagnostic figure.",
-      "artifact_refs": ["results_main", "fig_attempt_01_toy_dataset_diagnostic", "table_attempt_01_summary_metrics"]
+      "description": "Generated experiment code was executed inside the executor workspace.",
+      "artifact_refs": ["results_main", "llm_plan", "source_generated_experiment", "fig_attempt_01_generated_diagnostic", "table_attempt_01_generated_metrics"]
     }
   ],
   "policy_observance": {
@@ -110,8 +128,8 @@
     "notes": "All writes stayed under role/executor/workspaces/exec_001."
   },
   "limitations": [
-    "This is a toy runtime for integration testing, not a domain-specific experiment.",
-    "Only a single CSV target column is summarised."
+    "This is still an MVP integration loop, not a full sandbox.",
+    "Generated code is constrained by prompt and workspace checks, but should be sandboxed more strongly before untrusted use."
   ],
   "recommended_planner_next_steps": [
     "Use this response shape to test planner parsing.",

@@ -6,10 +6,19 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import platform
 import statistics
+import subprocess
+import sys
+import textwrap
 from pathlib import Path
 from typing import Any
+
+try:
+    from llm_client import chat_completion, extract_text, has_llm_credentials, load_llm_config
+except ImportError:  # pragma: no cover - supports package-style imports later.
+    from .llm_client import chat_completion, extract_text, has_llm_credentials, load_llm_config
 
 
 ROLE = "executor"
@@ -236,7 +245,268 @@ def build_svg_line_plot(rows: list[dict[str, float]], target_column: str) -> str
     )
 
 
-def run_minimal_execution(request: dict[str, Any]) -> dict[str, Any]:
+def extract_json_object(text: str) -> dict[str, Any]:
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.strip("`")
+        if cleaned.startswith("json"):
+            cleaned = cleaned[4:].strip()
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("LLM response did not contain a JSON object")
+    data = json.loads(cleaned[start : end + 1])
+    if not isinstance(data, dict):
+        raise ValueError("LLM response JSON must be an object")
+    return data
+
+
+def build_fallback_experiment_code() -> str:
+    return textwrap.dedent(
+        r'''
+        #!/usr/bin/env python3
+        """Generated fallback experiment code for executor smoke tests."""
+
+        from __future__ import annotations
+
+        import argparse
+        import csv
+        import json
+        import statistics
+        from pathlib import Path
+
+
+        def write_json(path: Path, data: dict) -> None:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+        def load_config(path: Path) -> dict:
+            with path.open("r", encoding="utf-8-sig") as handle:
+                data = json.load(handle)
+            if not isinstance(data, dict):
+                raise ValueError("config must be a JSON object")
+            return data
+
+
+        def load_rows(path: Path, target_column: str) -> list[dict[str, float]]:
+            rows = []
+            with path.open("r", encoding="utf-8-sig", newline="") as handle:
+                reader = csv.DictReader(handle)
+                if not reader.fieldnames or target_column not in reader.fieldnames:
+                    raise ValueError(f"dataset must contain target column: {target_column}")
+                for index, row in enumerate(reader, start=1):
+                    step = float(row.get("step") or index)
+                    value = float(row[target_column])
+                    rows.append({"step": step, target_column: value})
+            if not rows:
+                raise ValueError("dataset has no rows")
+            return rows
+
+
+        def svg_plot(rows: list[dict[str, float]], target_column: str) -> str:
+            width, height = 640, 360
+            left, right, top, bottom = 70, 580, 60, 300
+            steps = [row["step"] for row in rows]
+            values = [row[target_column] for row in rows]
+            min_x, max_x = min(steps), max(steps)
+            min_y, max_y = min(values), max(values)
+            x_span = max(max_x - min_x, 1.0)
+            y_span = max(max_y - min_y, 1.0)
+            points = []
+            for row in rows:
+                x = left + ((row["step"] - min_x) / x_span) * (right - left)
+                y = bottom - ((row[target_column] - min_y) / y_span) * (bottom - top)
+                points.append(f"{x:.1f},{y:.1f}")
+            return (
+                f"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{width}\" height=\"{height}\" viewBox=\"0 0 {width} {height}\">\n"
+                "  <rect width=\"640\" height=\"360\" fill=\"#ffffff\"/>\n"
+                f"  <line x1=\"{left}\" y1=\"{bottom}\" x2=\"{right}\" y2=\"{bottom}\" stroke=\"#222\"/>\n"
+                f"  <line x1=\"{left}\" y1=\"{bottom}\" x2=\"{left}\" y2=\"{top}\" stroke=\"#222\"/>\n"
+                f"  <polyline points=\"{' '.join(points)}\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"4\"/>\n"
+                "  <text x=\"70\" y=\"35\" font-family=\"Arial\" font-size=\"22\">Generated experiment diagnostic</text>\n"
+                f"  <text x=\"70\" y=\"335\" font-family=\"Arial\" font-size=\"14\">step</text>\n"
+                f"  <text x=\"18\" y=\"60\" font-family=\"Arial\" font-size=\"14\">{target_column}</text>\n"
+                "</svg>\n"
+            )
+
+
+        def main() -> int:
+            parser = argparse.ArgumentParser()
+            parser.add_argument("--dataset", required=True)
+            parser.add_argument("--config", required=True)
+            parser.add_argument("--workspace", required=True)
+            args = parser.parse_args()
+
+            workspace = Path(args.workspace)
+            for name in ["figures", "tables", "logs", "work"]:
+                (workspace / name).mkdir(parents=True, exist_ok=True)
+
+            config = load_config(Path(args.config))
+            target_column = str(config.get("target_column", "value"))
+            rows = load_rows(Path(args.dataset), target_column)
+            values = [row[target_column] for row in rows]
+            metrics = {
+                "count": len(values),
+                "mean": statistics.fmean(values),
+                "std": statistics.pstdev(values) if len(values) > 1 else 0.0,
+                "min": min(values),
+                "max": max(values),
+            }
+
+            figure_path = workspace / "figures" / "attempt_01_generated_diagnostic.svg"
+            table_path = workspace / "tables" / "attempt_01_generated_metrics.csv"
+            result_payload_path = workspace / "work" / "generated_result_payload.json"
+
+            figure_path.write_text(svg_plot(rows, target_column), encoding="utf-8")
+            table_path.write_text(
+                "metric,value\n" + "\n".join(f"{key},{value:.6g}" for key, value in metrics.items()) + "\n",
+                encoding="utf-8",
+            )
+            write_json(
+                result_payload_path,
+                {
+                    "target_column": target_column,
+                    "metrics": metrics,
+                    "figure_path": figure_path.as_posix(),
+                    "table_path": table_path.as_posix(),
+                    "result_payload_path": result_payload_path.as_posix(),
+                    "method": "generated fallback code summarised the CSV target column",
+                },
+            )
+            return 0
+
+
+        if __name__ == "__main__":
+            raise SystemExit(main())
+        '''
+    ).strip() + "\n"
+
+
+def build_llm_messages(request: dict[str, Any]) -> list[dict[str, str]]:
+    system_prompt = (ROLE_DIR / "system_prompt.md").read_text(encoding="utf-8")
+    user_prompt = {
+        "instruction": (
+            "Generate a bounded Python experiment script for the executor. "
+            "Return ONLY JSON with keys: plan, code, limitations. "
+            "The code must use only Python standard library, accept --dataset --config --workspace, "
+            "write work/generated_result_payload.json, one SVG figure under figures/, and one CSV table under tables/. "
+            "It must not access network, environment secrets, parent directories, or spawn agents."
+        ),
+        "request": request,
+    }
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": json.dumps(user_prompt, indent=2, sort_keys=True)},
+    ]
+
+
+def generate_experiment_code(
+    request: dict[str, Any],
+    workspace: Path,
+    llm_mode: str,
+    llm_config_path: str | None,
+) -> tuple[str, dict[str, Any]]:
+    plan_path = workspace / "work" / "llm_plan.json"
+    if llm_mode == "off":
+        metadata = {
+            "mode": "deterministic_fallback",
+            "plan": ["Use built-in generated fallback code.", "Read dataset.", "Compute metrics.", "Write artifacts."],
+            "limitations": ["LLM generation disabled by --llm off."],
+        }
+        write_json(plan_path, metadata)
+        return build_fallback_experiment_code(), metadata
+
+    config = load_llm_config(llm_config_path)
+    if not has_llm_credentials(config):
+        if llm_mode == "required":
+            raise RuntimeError("LLM credentials are required but no API key was found in environment/config")
+        metadata = {
+            "mode": "deterministic_fallback",
+            "plan": ["No LLM credentials found.", "Use built-in generated fallback code."],
+            "limitations": ["Set OPENAI_API_KEY, OPENROUTER_API_KEY, or EXECUTOR_LLM_API_KEY to enable LLM generation."],
+            "configured_model": config.get("model"),
+            "configured_base_url": config.get("base_url"),
+        }
+        write_json(plan_path, metadata)
+        return build_fallback_experiment_code(), metadata
+
+    completion = chat_completion(config, build_llm_messages(request))
+    content = extract_text(completion)
+    parsed = extract_json_object(content)
+    code = parsed.get("code")
+    if not isinstance(code, str) or "argparse" not in code:
+        raise RuntimeError("LLM did not return usable Python code")
+    metadata = {
+        "mode": "llm_generated",
+        "model": config.get("model"),
+        "base_url": config.get("base_url"),
+        "plan": parsed.get("plan", []),
+        "limitations": parsed.get("limitations", []),
+    }
+    write_json(plan_path, metadata)
+    return code.strip() + "\n", metadata
+
+
+def run_generated_experiment(code_path: Path, dataset_path: Path, config_path: Path, workspace: Path, timeout_seconds: int) -> dict[str, Any]:
+    env = os_safe_env()
+    command = [
+        sys.executable,
+        str(code_path),
+        "--dataset",
+        str(dataset_path.resolve()),
+        "--config",
+        str(config_path.resolve()),
+        "--workspace",
+        str(workspace),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=workspace,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=timeout_seconds,
+        check=False,
+    )
+    log_path = workspace / "logs" / "execution.log"
+    log_path.write_text(
+        "\n".join(
+            [
+                f"command={' '.join(command)}",
+                f"returncode={completed.returncode}",
+                "stdout:",
+                completed.stdout,
+                "stderr:",
+                completed.stderr,
+            ]
+        ),
+        encoding="utf-8",
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(f"generated experiment failed with exit code {completed.returncode}; see {log_path}")
+    payload_path = workspace / "work" / "generated_result_payload.json"
+    with payload_path.open("r", encoding="utf-8-sig") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, dict):
+        raise RuntimeError("generated_result_payload.json must contain a JSON object")
+    return payload
+
+
+def os_safe_env() -> dict[str, str]:
+    safe = dict(os.environ)
+    for key in ["OPENAI_API_KEY", "OPENROUTER_API_KEY", "EXECUTOR_LLM_API_KEY"]:
+        safe.pop(key, None)
+    safe["PYTHONNOUSERSITE"] = "1"
+    return safe
+
+
+def run_minimal_execution(
+    request: dict[str, Any],
+    *,
+    llm_mode: str = "auto",
+    llm_config_path: str | None = None,
+) -> dict[str, Any]:
     errors = validate_request(request)
     if errors:
         return build_rejected_response(request, errors)
@@ -260,52 +530,72 @@ def run_minimal_execution(request: dict[str, Any]) -> dict[str, Any]:
     if dataset_path is None:
         return build_rejected_response(request, ["missing dataset input with kind=dataset and .csv path"])
 
-    try:
-        baseline_config = load_baseline_config(config_path)
-        target_column = str(baseline_config.get("target_column", "value"))
-        dataset_rows = load_numeric_csv(dataset_path, target_column)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
-        return build_rejected_response(request, [str(exc)])
+    if config_path is None:
+        return build_rejected_response(request, ["missing config input with kind=config and .json path"])
 
-    values = [row[target_column] for row in dataset_rows]
-    summary_stats = summarise_values(values)
+    try:
+        generated_code, llm_metadata = generate_experiment_code(request, workspace, llm_mode, llm_config_path)
+    except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
+        return build_rejected_response(request, [f"LLM planning/code generation failed: {exc}"])
+
+    generated_code_path = workspace / "work" / "generated_experiment.py"
+    generated_code_path.write_text(generated_code, encoding="utf-8")
+
+    timeout_seconds = max(10, min(int(request.get("budget", {}).get("max_wall_time_minutes", 1)) * 60, 300))
+    try:
+        generated_payload = run_generated_experiment(generated_code_path, dataset_path, config_path, workspace, timeout_seconds)
+    except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired, json.JSONDecodeError) as exc:
+        return build_rejected_response(request, [f"generated experiment failed: {exc}"])
+
+    metrics = generated_payload.get("metrics", {})
+    if not isinstance(metrics, dict):
+        return build_rejected_response(request, ["generated result payload missing metrics object"])
+    mean_value = metrics.get("mean")
+    max_value = metrics.get("max")
 
     results_path = workspace / "results.json"
     tests_path = workspace / "tests.json"
     environment_path = workspace / "environment.json"
     artifacts_path = workspace / "artifacts.json"
     notes_path = workspace / "notes.md"
-    figure_path = workspace / "figures" / "attempt_01_toy_dataset_diagnostic.svg"
-    table_path = workspace / "tables" / "attempt_01_summary_metrics.csv"
+    llm_plan_path = workspace / "work" / "llm_plan.json"
+    figure_path = Path(str(generated_payload.get("figure_path", workspace / "figures" / "attempt_01_generated_diagnostic.svg")))
+    table_path = Path(str(generated_payload.get("table_path", workspace / "tables" / "attempt_01_generated_metrics.csv")))
     log_path = workspace / "logs" / "execution.log"
 
     results = {
         "request_id": request_id,
-        "mode": "toy_dataset_runtime",
+        "mode": "llm_backed_generated_code_runtime",
         "task": request["task"],
+        "llm": llm_metadata,
         "inputs": {
             "dataset": dataset_path.as_posix(),
-            "baseline_config": config_path.as_posix() if config_path else None,
-            "target_column": target_column,
+            "baseline_config": config_path.as_posix(),
+            "target_column": generated_payload.get("target_column"),
         },
         "baseline": {
-            "name": baseline_config.get("baseline_name", "toy_mean_baseline"),
-            "objective_value": summary_stats["mean"],
+            "name": "generated_code_mean_baseline",
+            "objective_value": mean_value,
         },
         "attempts": [
             {
                 "attempt_id": "attempt_01",
-                "description": "Computed summary statistics from the toy dataset.",
-                "metrics": summary_stats,
-                "objective_value": summary_stats["max"],
-                "improved_over_baseline": summary_stats["max"] >= summary_stats["mean"],
+                "description": "LLM-selected or fallback generated code ran inside the executor workspace.",
+                "metrics": metrics,
+                "objective_value": max_value,
+                "improved_over_baseline": (
+                    isinstance(max_value, (int, float))
+                    and isinstance(mean_value, (int, float))
+                    and max_value >= mean_value
+                ),
             }
         ],
         "best_attempt": {
             "attempt_id": "attempt_01",
-            "objective_value": summary_stats["max"],
-            "selection_reason": "For this toy example, the maximum observed value is treated as the best observed objective.",
+            "objective_value": max_value,
+            "selection_reason": "The generated experiment reported this as the best observed objective for the assigned run.",
         },
+        "generated_payload": generated_payload,
     }
     write_json(results_path, results)
 
@@ -313,7 +603,7 @@ def run_minimal_execution(request: dict[str, Any]) -> dict[str, Any]:
         {
             "criterion_id": criterion.get("criterion_id", f"criterion_{index + 1}"),
             "status": "passed",
-            "evidence": "Toy runtime read the dataset and produced metrics/artifacts for integration testing.",
+            "evidence": "Executor generated code, ran it, and produced metrics/artifacts for integration testing.",
             "artifact_refs": ["results_main", "tests_main"],
         }
         for index, criterion in enumerate(criteria)
@@ -322,7 +612,7 @@ def run_minimal_execution(request: dict[str, Any]) -> dict[str, Any]:
         "request_id": request_id,
         "overall": "passed",
         "checks": validation_checks,
-        "note": "These checks validate the self-contained toy executor example.",
+        "note": "These checks validate the executor generate-code/run-code/artifact loop.",
     }
     write_json(tests_path, tests)
 
@@ -332,52 +622,37 @@ def run_minimal_execution(request: dict[str, Any]) -> dict[str, Any]:
         "platform": platform.platform(),
         "role": ROLE,
         "schema_refs": SCHEMA_REFS,
+        "llm_mode": llm_mode,
     }
     write_json(environment_path, environment)
 
-    figure_path.write_text(build_svg_line_plot(dataset_rows, target_column), encoding="utf-8")
-
-    table_lines = ["metric,value"]
-    table_lines.extend(f"{key},{format_float(value)}" for key, value in summary_stats.items())
-    table_path.write_text("\n".join(table_lines) + "\n", encoding="utf-8")
-
-    log_lines = [
-        f"request_id={request_id}",
-        "mode=toy_dataset_runtime",
-        f"workspace={workspace}",
-        f"dataset={dataset_path}",
-        f"target_column={target_column}",
-        "browser_used=false",
-        "sessions_spawned=false",
-        "external_post_performed=false",
-    ]
-    log_path.write_text("\n".join(log_lines) + "\n", encoding="utf-8")
-
     notes = [
-        "# Executor Toy Runtime Notes",
+        "# Executor Generated-Code Runtime Notes",
         "",
-        "This run proves that the executor can accept a planner request, read a real toy input dataset, create a workspace, write artifacts, and return a structured response.",
+        "This run proves that the executor can accept a planner request, produce experiment code, run that code inside `role/executor/workspaces/`, generate a figure/table, and return a structured response.",
         "",
-        "The numerical values come from the toy dataset in `role/executor/examples/inputs/dataset.csv`.",
+        f"LLM generation mode: `{llm_metadata.get('mode')}`.",
     ]
     notes_path.write_text("\n".join(notes) + "\n", encoding="utf-8")
 
     artifact_entries = [
-        artifact("results_main", results_path, "results", "Toy dataset summary metrics.", "json", "primary_result"),
-        artifact("tests_main", tests_path, "tests", "Toy runtime validation checks.", "json", "audit"),
+        artifact("results_main", results_path, "results", "Generated-code experiment metrics.", "json", "primary_result"),
+        artifact("tests_main", tests_path, "tests", "Generated-code runtime validation checks.", "json", "audit"),
         artifact("environment_main", environment_path, "environment", "Runtime environment metadata.", "json", "audit"),
         artifact("artifacts_manifest", artifacts_path, "metadata", "Artifact manifest.", "json", "audit"),
-        artifact("fig_attempt_01_toy_dataset_diagnostic", figure_path, "figure", "Toy dataset diagnostic figure.", "svg", "diagnostic"),
-        artifact("table_attempt_01_summary_metrics", table_path, "table", "Toy dataset summary metrics table.", "csv", "supporting"),
-        artifact("log_execution", log_path, "log", "Toy runtime execution log.", "txt", "audit"),
-        artifact("notes_main", notes_path, "notes", "Toy runtime notes.", "md", "supporting"),
+        artifact("llm_plan", llm_plan_path, "metadata", "LLM or fallback execution plan.", "json", "audit"),
+        artifact("source_generated_experiment", generated_code_path, "source", "Generated experiment code executed by the executor.", "py", "audit"),
+        artifact("fig_attempt_01_generated_diagnostic", figure_path, "figure", "Generated experiment diagnostic figure.", "svg", "diagnostic"),
+        artifact("table_attempt_01_generated_metrics", table_path, "table", "Generated experiment metrics table.", "csv", "supporting"),
+        artifact("log_execution", log_path, "log", "Generated-code execution log.", "txt", "audit"),
+        artifact("notes_main", notes_path, "notes", "Generated-code runtime notes.", "md", "supporting"),
     ]
     write_json(artifacts_path, {"request_id": request_id, "artifacts": artifact_entries})
 
     response = {
         "request_id": request_id,
         "status": "succeeded",
-        "summary": "Toy executor runtime completed. The dataset was read and summary artifacts were written for planner integration testing.",
+        "summary": "Executor generated experiment code, ran it, produced a figure/table, and wrote structured artifacts.",
         "artifacts": artifact_entries,
         "validation": {
             "overall": "passed",
@@ -387,12 +662,14 @@ def run_minimal_execution(request: dict[str, Any]) -> dict[str, Any]:
             {
                 "attempt_id": "attempt_01",
                 "status": "succeeded",
-                "description": "Read the toy dataset and created summary metrics, a table, and a diagnostic figure.",
+                "description": "Generated experiment code was executed inside the executor workspace.",
                 "artifact_refs": [
                     "results_main",
                     "tests_main",
-                    "fig_attempt_01_toy_dataset_diagnostic",
-                    "table_attempt_01_summary_metrics",
+                    "llm_plan",
+                    "source_generated_experiment",
+                    "fig_attempt_01_generated_diagnostic",
+                    "table_attempt_01_generated_metrics",
                 ],
             }
         ],
@@ -404,12 +681,12 @@ def run_minimal_execution(request: dict[str, Any]) -> dict[str, Any]:
             "notes": "All generated files were written under workspace.write_path.",
         },
         "limitations": [
-            "This is a toy runtime for integration testing, not a domain-specific experiment.",
-            "Only a single CSV target column is summarised.",
+            "This is still an MVP integration loop, not a full sandbox.",
+            "Generated code is constrained by prompt and workspace checks, but should be sandboxed more strongly before untrusted use.",
         ],
         "recommended_planner_next_steps": [
             "Use this response shape to test planner parsing.",
-            "Replace placeholder execution with a planner-approved real experiment hook.",
+            "Provide real planner execution requests once planner schema emission is ready.",
         ],
     }
     write_json(workspace / "executor_response.json", response)
@@ -462,9 +739,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=PURPOSE)
     parser.add_argument("--request", help="Path to worker request JSON")
     parser.add_argument("--output", help="Path to write response JSON")
+    parser.add_argument(
+        "--llm",
+        choices=["auto", "off", "required"],
+        default="auto",
+        help="Use LLM code generation when credentials are available, disable it, or require it.",
+    )
+    parser.add_argument("--llm-config", help="Optional path to an OpenAI-compatible LLM config JSON")
     args = parser.parse_args()
 
-    response = run_minimal_execution(load_request(args.request))
+    response = run_minimal_execution(load_request(args.request), llm_mode=args.llm, llm_config_path=args.llm_config)
     response_errors = validate_response(response)
     if response_errors:
         raise ValueError("; ".join(response_errors))
