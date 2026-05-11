@@ -1,9 +1,10 @@
 # Skills
 
-- Mathematical review
-- Evidence review
-- Reproducibility review
-- Compliance review
-- PASS/REVISE/BLOCK gating
-- Five-round review cap handling
-- Forced PASS reporting with unresolved issue summaries
+- LLM-led correctness and consistency review
+- Requirement map construction from current materials
+- Evidence-backed issue classification
+- Reproducibility review with optional executor verify commands
+- Scope and integrity audit
+- Compliance review for `study_assistant` and `independent_research`
+- PASS/REVISE/REPLAN/BLOCK/INCONCLUSIVE routing
+- Pass-token issuance for reviewed artifact hashes
