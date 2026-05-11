@@ -13,6 +13,7 @@
   "notes": [
     "This single OpenClaw agent is both main and research planner.",
     "It receives user input, maintains planner state, employs preexisting workers, and returns final results.",
-    "It must not access the internet directly; literature_reviewer owns internet-backed research."
+    "It must not access the internet directly for research; literature_reviewer owns internet-backed research.",
+    "It may use GitHub operational tools for repository lifecycle management."
   ]
 }

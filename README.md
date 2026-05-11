@@ -61,6 +61,10 @@ executed by OpenClaw roles and replaced later.
 The OpenClaw planner should employ these existing roles rather than create new
 ones.
 
+GitHub repository operations are allowed for the OpenClaw planner as operational
+repo maintenance, not as general internet research. See
+`openclaw/github_setup.md`.
+
 ## Local Setup
 
 ```bash

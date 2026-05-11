@@ -4,9 +4,22 @@
     "allow": [
       "read",
       "write",
+      "git",
+      "gh",
+      "github_repo_create",
+      "github_repo_update",
+      "github_issue",
+      "github_pull_request",
       "sessions_spawn",
       "sessions_history",
       "session_status"
+    ],
+    "guarded": [
+      "github_create_public_repo",
+      "github_delete_repo",
+      "github_transfer_repo",
+      "github_force_push",
+      "github_publish_release"
     ],
     "deny": [
       "browser",
@@ -14,12 +27,21 @@
       "http_fetch",
       "external_source_lookup",
       "exec_unrestricted",
-      "external_post"
+      "external_post_non_github"
     ]
+  },
+  "github": {
+    "preferredClient": "gh",
+    "fallbackClient": "git",
+    "defaultVisibility": "private",
+    "requiresAuth": true,
+    "setupGuide": "openclaw/github_setup.md",
+    "allowedPurpose": "repository lifecycle and maintenance only"
   },
   "notes": [
     "The OpenClaw main/planner must not have direct internet access.",
     "Any internet, paper, citation, DOI, arXiv, or source-verification need must be delegated to role/literature_reviewer.",
+    "GitHub access is allowed only for repository lifecycle operations, not general web research.",
     "Worker role MCP access should remain separate and narrower than needed for each role."
   ]
 }
