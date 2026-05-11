@@ -10,6 +10,7 @@
     "compliance_mode",
     "approved_by_reviewer",
     "review_artifact_ref",
+    "pass_token_ref",
     "report_type",
     "sections",
     "artifact_refs",
@@ -20,6 +21,7 @@
     "compliance_mode": { "$ref": "#/$defs/compliance_mode" },
     "approved_by_reviewer": { "const": true },
     "review_artifact_ref": { "$ref": "#/$defs/artifact_ref" },
+    "pass_token_ref": { "$ref": "#/$defs/artifact_ref" },
     "report_type": {
       "type": "string",
       "enum": ["research_memo", "independent_research_report"]

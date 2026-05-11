@@ -20,6 +20,13 @@ Each role contains:
 - `skills.md` - concise local skills inventory
 - `mcp.json` - placeholder MCP configuration
 
+`role/reviewer/` additionally contains:
+
+- `SKILL.md` - reviewer workflow and script map
+- `references/` - review, routing, logic, visualization, and compliance policy
+- `workspace/` - inbox, scratch, outbox, and logs directories for runtime review
+  artifacts
+
 Example:
 
 ```bash
@@ -28,8 +35,10 @@ python role/literature_reviewer/literature_reviewer.py \
   --output /tmp/literature_reviewer_result.json
 ```
 
-The Python modules are scaffolds. They do not solve a specific problem; they
-load a JSON request, return a role envelope, and make the workspace replaceable.
+Most Python modules are scaffolds. The reviewer module is a runnable gate:
+it builds mechanical evidence, asks an LLM for the review decision when
+configured, writes `review_report.json`, and issues `pass_token.json` only for
+`PASS`.
 
 The OpenClaw planner should employ these existing worker roles rather than
 create new roles. If it needs internet access, paper search, citation checking,

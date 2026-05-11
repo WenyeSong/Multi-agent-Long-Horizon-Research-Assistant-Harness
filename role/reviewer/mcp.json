@@ -1,7 +1,9 @@
 {
   "mcpServers": {},
   "notes": [
-    "Add read-only validation MCP/tool access here later.",
-    "No write-code or spawn tools should be configured for this role."
+    "Reviewer should read planner, literature, executor, and task material refs only through the review packet.",
+    "Reviewer should write only inside role/reviewer/workspace/.",
+    "Optional verification is allowed only for executor-provided commands and should stay bounded.",
+    "No write-code, spawn, pdf generation, or unrestricted browser tools should be configured for this role."
   ]
 }
