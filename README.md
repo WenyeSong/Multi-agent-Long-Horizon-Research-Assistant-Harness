@@ -41,8 +41,11 @@ The architecture implied by these schemas is:
   `pdf_generator`. Source-only requests may stop after `literature_reviewer`.
 - human feedback is treated as report-scoping or report-revision input unless
   the user explicitly says otherwise.
+- each OpenClaw session writes to a matching project workspace:
+  `projects/<session_name>/`. Use the CLI `--session`, `--session-id`, or
+  runtime session id as both `session_name` and planner `trace_id`.
 - every worker invocation is traced under
-  `projects/<trace_id>/provenance/agent_trace.jsonl` and summarized in planner
+  `projects/<session_name>/provenance/agent_trace.jsonl` and summarized in planner
   replies. `scripts/agent_trace.py` can append those traces and print
   CLI-visible `[Agent Trace]` lines.
 - interactive OpenClaw sessions may use `sessions_yield` before long worker

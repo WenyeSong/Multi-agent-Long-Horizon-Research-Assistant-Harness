@@ -28,6 +28,14 @@ If no candidate contains the real repository, stop and report that the
 workspace path is misconfigured. Do not create replacement schemas, roles,
 prompts, or worker code in `/tmp` or any other ad hoc location.
 
+Project workspace naming must match the OpenClaw session. At task intake,
+derive `session_name` from the active CLI `--session`, `--session-id`, or
+runtime session id. Use that exact value for `trace_id`, `project_id`, and the
+workspace directory `projects/<session_name>/`. Do not create topic-derived or
+scratch names such as `project_demo`, `rw_exec`, `orch_smoke`, or
+`orch_check_planarity` as top-level project workspaces. If the user changes
+session intentionally, start a new matching workspace.
+
 Also check for unresolved merge markers or unmerged Git paths before executing
 worker modules. If any are present, stop and report the affected paths. Do not
 run orchestration on conflicted worker code.
@@ -122,16 +130,16 @@ phase starts:
 `Agent Trace: <agent> -> starting -> <purpose/context>`
 
 When using local Python role modules, `sessions_yield` ends the current turn; on
-the next user message, continue from `projects/<trace_id>/state/state.json` and
-the trace files rather than restarting. Prefer one worker phase per yielded turn
-in interactive sessions so the user sees each role being employed. For one-shot
-non-interactive runs, include the full start/finish trace for every role in the
-final reply.
+the next user message, continue from
+`projects/<session_name>/state/state.json` and the trace files rather than
+restarting. Prefer one worker phase per yielded turn in interactive sessions so
+the user sees each role being employed. For one-shot non-interactive runs,
+include the full start/finish trace for every role in the final reply.
 
 Also persist the trace at:
 
-- `projects/<trace_id>/provenance/agent_trace.jsonl`
-- `projects/<trace_id>/provenance/agent_trace_summary.md`
+- `projects/<session_name>/provenance/agent_trace.jsonl`
+- `projects/<session_name>/provenance/agent_trace_summary.md`
 
 When practical, use `scripts/agent_trace.py` to append trace entries because it
 also prints a CLI-visible `[Agent Trace] ...` line.

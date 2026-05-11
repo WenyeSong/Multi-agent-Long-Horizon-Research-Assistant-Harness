@@ -28,6 +28,7 @@ role/workspace/
 venv/
 __pycache__/
 *.py[cod]
+tmp_*.json
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

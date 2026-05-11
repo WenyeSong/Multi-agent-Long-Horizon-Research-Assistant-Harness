@@ -41,9 +41,14 @@ planner state enables GitHub sync. It still delegates all internet-backed
 research to `role/literature_reviewer`.
 
 Every worker invocation should be auditable. The planner writes trace entries to
-`projects/<trace_id>/provenance/agent_trace.jsonl`, maintains a readable
+`projects/<session_name>/provenance/agent_trace.jsonl`, maintains a readable
 `agent_trace_summary.md`, mirrors current entries in planner state, and includes
 a concise `Agent Trace` section in CLI replies after workers run.
+
+Project workspace names should match OpenClaw session names. For a session
+started with `--session research-main`, the workspace is
+`projects/research-main/`; for `--session markov`, it is `projects/markov/`.
+Do not create top-level project folders from topic names or scratch labels.
 
 Plain "do research on ..." requests use the full HTML-report pipeline by
 default: `literature_reviewer` -> `executor` -> `reviewer` -> `pdf_generator`.

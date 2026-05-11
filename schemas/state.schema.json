@@ -17,7 +17,10 @@
     "allowed_next_actions"
   ],
   "properties": {
-    "trace_id": { "$ref": "#/$defs/trace_id" },
+    "trace_id": {
+      "description": "Use the active OpenClaw session name or session id so the workspace path is projects/<session_name>/.",
+      "$ref": "#/$defs/trace_id"
+    },
     "phase": {
       "type": "string",
       "enum": [
