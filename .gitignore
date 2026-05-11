@@ -1,0 +1,42 @@
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+llm_config.json
+llm_config_openrouter.json
+auth-profiles.json
+*secret*
+*token*
+
+# Local OpenClaw/Codex state
+.openclaw/
+.agents/
+.codex/
+AGENTS.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+TOOLS.md
+USER.md
+
+# Python environments and generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Current scratch/test Python files from the hackathon setup
+conversable_agent.py
+first_agent.py
+lg_hello.py
+test.py
+env_start.sh
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
