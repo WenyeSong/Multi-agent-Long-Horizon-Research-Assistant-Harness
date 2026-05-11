@@ -8,7 +8,7 @@ role/executor
 
 The executor is a planner-controlled worker. It designs bounded experiments, runs reproducibility checks, creates visualisations, validates results, and returns execution artifacts to the planner.
 
-It must not search literature, spawn agents, call reviewer/PDF roles, decide the global research route, or write final report prose. In `study_assistant` mode, it must not produce directly submit-ready coursework source code.
+It must not search literature, spawn agents, call reviewer/report-generator roles, decide the global research route, or write final report prose. In `study_assistant` mode, it must not produce directly submit-ready coursework source code.
 
 ## Required Role Files
 
@@ -50,11 +50,11 @@ Run with LLM generation when credentials are available:
 py -3 role\executor\executor.py --request role\executor\examples\example_request.json --output role\executor\workspaces\exec_001\executor_response.json --llm auto
 ```
 
-`--llm auto` reads local config or environment variables. Do not commit real API keys. Use `role/executor/llm_config.example.json` as a template for a local ignored `role/executor/llm_config.json`, or set `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `EXECUTOR_LLM_API_KEY`.
+`--llm auto` reads local config or environment variables. Do not commit real API keys. Use `role/executor/llm_config.example.json` as a template for a local ignored `role/executor/llm_config.json`, or set `OPENAI_API_KEY` / `EXECUTOR_LLM_API_KEY`.
 
-When using an OpenAI key directly, set `EXECUTOR_LLM_MODEL` if you want a specific model:
+When using OpenAI, set `EXECUTOR_LLM_MODEL` if you want a role-specific model:
 
 ```powershell
 $env:OPENAI_API_KEY="..."
-$env:EXECUTOR_LLM_MODEL="gpt-4o-mini"
+$env:EXECUTOR_LLM_MODEL="gpt-5.4-nano"
 ```

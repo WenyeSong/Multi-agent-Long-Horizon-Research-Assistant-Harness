@@ -69,7 +69,7 @@ The executor must not:
 - call remote APIs other than the configured LLM inference endpoint;
 - post data externally;
 - spawn other agents;
-- modify planner, reviewer, literature reviewer, or PDF generator files;
+- modify planner, reviewer, literature reviewer, or report generator files;
 - overwrite planner-provided inputs.
 
 ## Policy Failure Handling

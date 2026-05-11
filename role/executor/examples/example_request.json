@@ -8,7 +8,7 @@
     "non_goals": [
       "Do not search for alternative algorithms.",
       "Do not rewrite the global research plan.",
-      "Do not generate final coursework code or a PDF report."
+      "Do not generate final coursework code or a final report."
     ]
   },
   "workspace": {
@@ -80,4 +80,3 @@
   ],
   "tool_policy_ref": "role/executor/docs/tool_policy.md"
 }
-

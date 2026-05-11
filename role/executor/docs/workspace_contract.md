@@ -60,7 +60,7 @@ The executor must not write to:
 - planner workspace;
 - literature reviewer workspace;
 - reviewer workspace;
-- PDF generator workspace;
+- Report generator workspace;
 - system temp directories unless the sandbox maps them into the execution workspace;
 - credential or configuration directories.
 
@@ -94,4 +94,3 @@ The executor should record:
 ## Artifact Manifest
 
 The executor should write `artifacts.json` when it produces more than the three core JSON files. The manifest should list figures, tables, logs, source files, and notes with stable ids, paths, formats, roles, and short descriptions.
-

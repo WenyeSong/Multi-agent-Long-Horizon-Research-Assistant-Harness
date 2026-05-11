@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.local/multi-agent-hackathon/review_result.schema.json",
   "title": "ReviewResult",
-  "description": "Reviewer judgment before PDF generation. The LLM makes the review decision; scripts provide preflight, provenance, optional verification, and scope evidence.",
+  "description": "Reviewer judgment before final report generation. The LLM makes the review decision; scripts provide preflight, provenance, optional verification, and scope evidence. The legacy pdf_generator route currently emits HTML.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -13,7 +13,11 @@ def route_from_review(report: dict[str, Any]) -> dict[str, str]:
     decision = report.get("decision")
     route = report.get("route_suggestion") or "planner"
     if decision == "PASS":
-        return {"next_action": "spawn_pdf_generator", "target": "pdf_generator"}
+        return {
+            "next_action": "spawn_pdf_generator",
+            "target": "pdf_generator",
+            "output_format": "html",
+        }
     if decision == "REVISE":
         target = route if route in {"executor", "literature_reviewer", "pdf_generator"} else "planner"
         return {"next_action": f"revise_{target}", "target": target}

@@ -36,10 +36,23 @@ The architecture implied by these schemas is:
 - the current OpenClaw agent is both `main` and the research planner.
 - workers do not talk to each other.
 - all worker outputs return to the OpenClaw planner as JSON artifact refs.
+- plain "do research on ..." requests run the default reviewed HTML-report
+  pipeline: `literature_reviewer` -> `executor` -> `reviewer` ->
+  `pdf_generator`. Source-only requests may stop after `literature_reviewer`.
+- human feedback is treated as report-scoping or report-revision input unless
+  the user explicitly says otherwise.
+- every worker invocation is traced under
+  `projects/<trace_id>/provenance/agent_trace.jsonl` and summarized in planner
+  replies. `scripts/agent_trace.py` can append those traces and print
+  CLI-visible `[Agent Trace]` lines.
+- interactive OpenClaw sessions may use `sessions_yield` before long worker
+  phases so role employment is visible before the final answer.
 - the OpenClaw planner does not access the internet directly.
 - internet-backed research is delegated to `role/literature_reviewer/`.
 - `pdf_generator` can run only after `reviewer` returns `PASS` and issues a
   pass token bound to reviewed artifact hashes.
+- `pdf_generator` is a legacy role name; it currently renders approved HTML
+  reports through `role/pdf_generator/html_generator.py`.
 - reviewer loops are capped at 5 rounds; round 5 becomes an explicit forced
   `PASS` with unresolved issues reported.
 - default compliance mode is `study_assistant`.
@@ -84,13 +97,37 @@ cp .env.example .env
 Fill `.env` with local credentials, then create local model config files from
 the example as needed.
 
-For the current setup, use OpenRouter as the active local model config:
+For the current setup, use OpenAI as the active local model config:
 
 ```bash
-cp llm_config_openrouter.json llm_config.json
+cp llm_config.example.json llm_config.json
+set -a
+source .env
+set +a
+openclaw models set openai/gpt-5.4-nano
 ```
 
-Both files are ignored by Git because they can contain API keys.
+`.env` and `llm_config.json` are ignored by Git because they can contain API
+keys. Prefer `OPENAI_API_KEY` in `.env`; keep committed config files as
+placeholders only.
+
+## Running OpenClaw
+
+Interactive terminal UI:
+
+```bash
+openclaw chat --local --session research-main --thinking low
+```
+
+One-shot command:
+
+```bash
+openclaw agent --local --agent main --session-id research-main --thinking low \
+  --message "Do research on finding a human-readable proof of the four colour theorem."
+```
+
+`openclaw agent` always needs `--message`; use `openclaw chat` or
+`openclaw tui` for an interactive session.
 
 ## Next Step
 

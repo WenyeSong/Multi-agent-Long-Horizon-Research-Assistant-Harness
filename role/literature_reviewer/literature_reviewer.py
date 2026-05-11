@@ -8,20 +8,43 @@ import json
 import os
 import re
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except ImportError:  # pragma: no cover - exercised only when dependency is absent
+    OpenAI = None  # type: ignore[assignment]
 
 ROLE = "literature_reviewer"
 PURPOSE = "Find and summarize papers, then return structured literature artifacts."
 SCHEMA_REFS = ["schemas/literature_result.schema.json"]
+ROLE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = ROLE_DIR.parents[1]
 
-client = OpenAI(
-    api_key=os.environ["OPENAI_API_KEY"],
-    base_url=os.environ.get("OPENAI_BASE_URL"),
-)
-MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+
+def _load_env_files(paths: list[Path]) -> None:
+    """Load local .env values without overwriting an existing shell environment."""
+    for path in paths:
+        if not path.exists():
+            continue
+        for raw_line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
+_load_env_files([REPO_ROOT / ".env", REPO_ROOT.parent / ".env"])
+
+_client: Any | None = None
+MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.4-nano")
 
 MAX_RETRIES = 2   # how many times judge can send SearchAgent back for revision
 
@@ -35,16 +58,96 @@ THRESHOLDS = {
 
 # ── LLM helper ────────────────────────────────────────────────────────────────
 
+def _get_client() -> Any:
+    global _client
+    if _client is not None:
+        return _client
+    if OpenAI is None:
+        return None
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "OPENAI_API_KEY is not set. The literature_reviewer owns literature "
+            "search and external source verification for the planner."
+        )
+    _client = OpenAI(
+        api_key=api_key,
+        base_url=os.environ.get("OPENAI_BASE_URL") or None,
+    )
+    return _client
+
+
+def _api_key() -> str:
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "OPENAI_API_KEY is not set. Set it in the shell or .env before running "
+            "literature_reviewer with live API access."
+        )
+    return api_key
+
+
+def _call_chat_completion_http(
+    messages: list[dict],
+    temperature: float,
+    *,
+    json_mode: bool,
+) -> str:
+    base_url = (os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1").rstrip("/")
+    payload: dict[str, Any] = {
+        "model": MODEL,
+        "messages": messages,
+        "temperature": temperature,
+    }
+    if json_mode:
+        payload["response_format"] = {"type": "json_object"}
+
+    request = urllib.request.Request(
+        f"{base_url}/chat/completions",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {_api_key()}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=90) as handle:
+            response = json.loads(handle.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"OpenAI chat completion failed: HTTP {exc.code} {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"OpenAI chat completion failed: {exc}") from exc
+
+    choices = response.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise RuntimeError("OpenAI chat completion response did not contain choices")
+    message = choices[0].get("message") if isinstance(choices[0], dict) else None
+    content = message.get("content") if isinstance(message, dict) else None
+    if not isinstance(content, str):
+        raise RuntimeError("OpenAI chat completion response did not contain message.content")
+    return content
+
+
 def _call_llm(messages: list[dict], temperature: float) -> str:
     kwargs = dict(model=MODEL, messages=messages, temperature=temperature)
+    client = _get_client()
     try:
-        resp = client.chat.completions.create(
-            **kwargs, response_format={"type": "json_object"}
-        )
+        if client is None:
+            content = _call_chat_completion_http(messages, temperature, json_mode=True)
+        else:
+            resp = client.chat.completions.create(
+                **kwargs, response_format={"type": "json_object"}
+            )
+            content = resp.choices[0].message.content or ""
     except Exception:
-        resp = client.chat.completions.create(**kwargs)
+        if client is None:
+            content = _call_chat_completion_http(messages, temperature, json_mode=False)
+        else:
+            resp = client.chat.completions.create(**kwargs)
+            content = resp.choices[0].message.content or ""
 
-    content = resp.choices[0].message.content or ""
     if "```" in content:
         m = re.search(r"```(?:json)?\s*([\s\S]*?)```", content)
         if m:
@@ -60,7 +163,7 @@ class SearchAgent:
     SYSTEM_PROMPT = (
         "You are a scientific literature search specialist. "
         "Return exactly 10 papers with complete, accurate metadata. "
-        "Always respond in valid JSON."
+        "Always respond in valid JSON. All generated text must be in English."
     )
 
     PROMPT = """Research goal: "{goal}"
@@ -129,7 +232,7 @@ class SummaryAgent:
     SYSTEM_PROMPT = (
         "You are a scientific research synthesiser. "
         "Given a list of papers, extract cross-cutting themes, method families, and risks. "
-        "Always respond in valid JSON."
+        "Always respond in valid JSON. All generated text must be in English."
     )
 
     PROMPT = """Research goal: "{goal}"

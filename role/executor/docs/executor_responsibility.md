@@ -27,7 +27,7 @@ The executor must not:
 - Expand the task beyond planner-provided goals.
 - Call or spawn `literature_reviewer`, `reviewer`, `pdf_generator`, or any other agent.
 - Generate final coursework code intended for direct submission without planner review.
-- Generate final PDF reports or polished submission documents.
+- Generate final reports or polished submission documents.
 - Publish, upload, email, or post artifacts externally.
 - Read files outside planner-authorised inputs and the execution workspace.
 - Write files outside the execution workspace.

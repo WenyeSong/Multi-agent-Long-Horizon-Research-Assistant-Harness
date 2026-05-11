@@ -103,6 +103,7 @@ def build_llm_context(
             "decision": "PASS | REVISE | REPLAN | BLOCK | INCONCLUSIVE",
             "confidence": "high | medium | low",
             "route_suggestion": "planner | literature_reviewer | executor | main | pdf_generator | none",
+            "report_output_format": "html when routing to the legacy pdf_generator role",
             "summary": "short reviewer judgment",
             "blocking_issues": [],
             "major_issues": [],
@@ -152,6 +153,7 @@ def call_openai_review(system_text: str, user_text: str, model: str, max_tokens:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not available")
+    base_url = (os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1").rstrip("/")
     body = {
         "model": model,
         "input": [
@@ -167,7 +169,7 @@ def call_openai_review(system_text: str, user_text: str, model: str, max_tokens:
         "max_output_tokens": max_tokens,
     }
     request = urllib.request.Request(
-        "https://api.openai.com/v1/responses",
+        f"{base_url}/responses",
         data=json.dumps(body).encode("utf-8"),
         headers={
             "Authorization": f"Bearer {api_key}",

@@ -265,7 +265,7 @@ def build_fallback_experiment_code() -> str:
     return textwrap.dedent(
         r'''
         #!/usr/bin/env python3
-        """Generated fallback experiment code for executor smoke tests."""
+        """Generated fallback experiment code for local executor checks."""
 
         from __future__ import annotations
 
@@ -424,7 +424,7 @@ def generate_experiment_code(
         metadata = {
             "mode": "deterministic_fallback",
             "plan": ["No LLM credentials found.", "Use built-in generated fallback code."],
-            "limitations": ["Set OPENAI_API_KEY, OPENROUTER_API_KEY, or EXECUTOR_LLM_API_KEY to enable LLM generation."],
+            "limitations": ["Set OPENAI_API_KEY or EXECUTOR_LLM_API_KEY to enable LLM generation."],
             "configured_model": config.get("model"),
             "configured_base_url": config.get("base_url"),
         }

@@ -4,7 +4,7 @@ This document is the integration handoff for any planner-side agent or teammate 
 
 The executor is a bounded execution worker. It performs algorithm design, numerical experiments, visualisation, and result validation only when the planner gives it a concrete execution request.
 
-The executor does not choose the global research route, search literature, call reviewers, generate PDFs, or publish anything externally.
+The executor does not choose the global research route, search literature, call reviewers, generate final reports, or publish anything externally.
 
 ## Files To Read First
 
@@ -171,7 +171,7 @@ Executor may write only under:
 workspace.write_path
 ```
 
-Planner should not expect executor to modify planner files, input artifacts, reviewer files, PDF generator files, or repository-level configuration.
+Planner should not expect executor to modify planner files, input artifacts, reviewer files, report generator files, or repository-level configuration.
 
 ## Artifact Contract
 
@@ -270,7 +270,7 @@ Executor must not:
 - search literature;
 - install dependencies from the network unless explicitly pre-approved;
 - spawn sub-agents;
-- call reviewer or PDF generator;
+- call reviewer or report generator;
 - upload or post data externally;
 - write outside its workspace.
 
@@ -312,7 +312,7 @@ Before connecting planner to executor, confirm:
 - Planner expects artifact refs, not embedded files.
 - Planner can parse a response shaped like `examples/example_response.json`.
 - Planner handles `succeeded`, `partial`, `failed`, `blocked`, and `rejected`.
-- Planner does not ask executor to browse, spawn agents, review, generate PDFs, or decide the global research route.
+- Planner does not ask executor to browse, spawn agents, review, generate final reports, or decide the global research route.
 
 ## Common Failure Modes
 
@@ -341,7 +341,5 @@ Planner owns task selection, workspace allocation, authorised inputs, success cr
 
 Executor only performs bounded execution inside workspace.write_path, generates artifacts, validates against success_criteria, and returns artifact refs plus validation results.
 
-Executor must not browse, spawn agents, call reviewer/PDF generator, decide the global research route, or write outside workspace.write_path.
+Executor must not browse, spawn agents, call reviewer/report generator, decide the global research route, or write outside workspace.write_path.
 ```
-
-

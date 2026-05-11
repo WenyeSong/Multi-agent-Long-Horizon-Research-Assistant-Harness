@@ -31,7 +31,7 @@ Planner should decide:
 - what input artifacts are trusted;
 - what counts as success;
 - when partial results are acceptable;
-- whether to call literature reviewer, reviewer, or PDF generator;
+- whether to call literature reviewer, reviewer, or report generator;
 - whether executor output should trigger another execution request.
 
 Executor should not make these global decisions.
@@ -90,7 +90,7 @@ Avoid these handoff mistakes:
 - Planner omits `workspace.write_path`.
 - Planner provides inputs but does not include them in `workspace.read_paths`.
 - Planner expects executor to search the web for missing context.
-- Planner expects executor to call reviewer or PDF generator.
+- Planner expects executor to call reviewer or report generator.
 - Executor writes outside the assigned run directory.
 - Executor returns prose but no machine-readable artifacts.
 - Executor reports success without mapping checks to `success_criteria`.
@@ -105,4 +105,3 @@ Before formal agent connection, confirm:
 - `example_response.json` contains all fields planner needs.
 - Tool policy can be enforced by the chosen runtime.
 - Workspace paths are either absolute or resolved consistently by both sides.
-

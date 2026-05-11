@@ -15,11 +15,11 @@ recovery route.
 - Literature does not support a claim: `literature_reviewer`
 - Citation is missing, nonexistent, or irrelevant: `literature_reviewer`
 - User material or compliance conditions are unclear: `main`
-- Post-PASS PDF formatting problem: `pdf_generator`
+- Post-PASS HTML report formatting problem: `pdf_generator`
 
 ## Decision To Route
 
-- `PASS`: planner may call `pdf_generator`
+- `PASS`: planner may call the legacy-named `pdf_generator` HTML renderer
 - `REVISE`: planner should call the suggested worker owner
 - `REPLAN`: planner should update state, success criteria, or experiment design
 - `BLOCK`: planner should return to `main` or human review

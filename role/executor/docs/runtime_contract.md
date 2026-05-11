@@ -2,7 +2,7 @@
 
 This document defines the expected runtime shape before any implementation exists.
 
-The executor runtime should be a small adapter around the design contract. It should not contain planner logic, literature search, review logic, or PDF generation.
+The executor runtime should be a small adapter around the design contract. It should not contain planner logic, literature search, review logic, or final report generation.
 
 ## Runtime Boundary
 
@@ -101,7 +101,7 @@ For the MVP, prefer paths relative to the repository root in JSON examples, and 
 The runtime must not:
 
 - implement planner scheduling;
-- call reviewer or PDF generator;
+- call reviewer or report generator;
 - search literature;
 - use browser tools;
 - spawn sub-agents;

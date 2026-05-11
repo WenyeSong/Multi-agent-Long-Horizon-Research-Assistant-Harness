@@ -49,6 +49,13 @@ PATH_KEY_HINTS = (
     "state",
 )
 
+OUTPUT_ONLY_PATH_KEYS = {
+    "output",
+    "output_path",
+    "review_output",
+    "review_report_output",
+}
+
 
 class ReviewError(RuntimeError):
     """Raised for script-level reviewer utility errors."""
@@ -158,6 +165,8 @@ def extract_path_refs(payload: Any, *, parent_key: str = "") -> list[dict[str, s
             refs.extend(extract_path_refs(value, parent_key=parent_key))
     elif isinstance(payload, str):
         key_lower = parent_key.lower()
+        if key_lower in OUTPUT_ONLY_PATH_KEYS:
+            return refs
         stripped = payload.strip().replace("\\", "/")
         has_path_key = any(hint in key_lower for hint in PATH_KEY_HINTS)
         has_known_prefix = stripped.startswith(("./", "../", "projects/", "/projects/", "role/"))
@@ -336,7 +345,9 @@ def render_review_markdown(report: dict[str, Any]) -> str:
     add_section("Advisory Notes", report["advisory_notes"])
     lines.append("## Suggested Recovery")
     if report["decision"] == "PASS":
-        lines.append("Planner may proceed to pdf_generator using the pass token.")
+        lines.append(
+            "Planner may proceed to the legacy pdf_generator HTML renderer using the pass token."
+        )
     elif report["decision"] == "REVISE":
         lines.append(f"Planner should route this back to {report['route_suggestion']}.")
     elif report["decision"] == "REPLAN":

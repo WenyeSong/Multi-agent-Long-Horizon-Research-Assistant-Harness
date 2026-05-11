@@ -100,6 +100,56 @@
         }
       }
     },
+    "role_orchestration": {
+      "type": "object",
+      "description": "Planner-owned checklist proving which worker roles are required and how many times each has run for this trace.",
+      "additionalProperties": false,
+      "required": [
+        "pipeline_mode",
+        "required_roles",
+        "invocation_counts",
+        "all_required_roles_invoked",
+        "minimum_report_pipeline_completed"
+      ],
+      "properties": {
+        "pipeline_mode": {
+          "type": "string",
+          "enum": ["source_only", "full_report"]
+        },
+        "required_roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/worker_agent" }
+        },
+        "invocation_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "literature_reviewer",
+            "executor",
+            "reviewer",
+            "pdf_generator"
+          ],
+          "properties": {
+            "literature_reviewer": { "type": "integer", "minimum": 0 },
+            "executor": { "type": "integer", "minimum": 0 },
+            "reviewer": { "type": "integer", "minimum": 0 },
+            "pdf_generator": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "all_required_roles_invoked": { "type": "boolean" },
+        "minimum_report_pipeline_completed": {
+          "type": "boolean",
+          "description": "True only after every required role for this pipeline mode has run in the current trace and report gating rules have been satisfied."
+        },
+        "last_missing_roles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/worker_agent" },
+          "uniqueItems": true
+        }
+      }
+    },
     "problem": {
       "type": "object",
       "additionalProperties": false,
@@ -182,8 +232,17 @@
         "review_result": { "$ref": "#/$defs/artifact_ref" },
         "approved_content": { "$ref": "#/$defs/artifact_ref" },
         "report_spec": { "$ref": "#/$defs/artifact_ref" },
-        "final_pdf": { "$ref": "#/$defs/artifact_ref" }
+        "agent_trace": { "$ref": "#/$defs/artifact_ref" },
+        "agent_trace_summary": { "$ref": "#/$defs/artifact_ref" },
+        "final_pdf": { "$ref": "#/$defs/artifact_ref" },
+        "final_html": { "$ref": "#/$defs/artifact_ref" },
+        "final_report": { "$ref": "#/$defs/artifact_ref" }
       }
+    },
+    "agent_trace": {
+      "type": "array",
+      "description": "Concise planner-owned trace of worker role invocations and routing context.",
+      "items": { "$ref": "#/$defs/agent_trace_entry" }
     },
     "last_worker_result": {
       "type": "object",
@@ -236,12 +295,20 @@
       "if": { "properties": { "phase": { "const": "S9_final" } } },
       "then": {
         "properties": {
+          "role_orchestration": {
+            "required": ["all_required_roles_invoked", "minimum_report_pipeline_completed"],
+            "properties": {
+              "all_required_roles_invoked": { "const": true },
+              "minimum_report_pipeline_completed": { "const": true }
+            }
+          },
           "allowed_next_actions": {
             "items": {
               "enum": ["return_final", "block_for_human"]
             }
           }
-        }
+        },
+        "required": ["role_orchestration"]
       }
     }
   ],
@@ -259,6 +326,81 @@
       "type": "string",
       "minLength": 1,
       "pattern": "^(projects/|/projects/|\\./projects/).+"
+    },
+    "worker_agent": {
+      "type": "string",
+      "enum": [
+        "literature_reviewer",
+        "executor",
+        "reviewer",
+        "pdf_generator"
+      ]
+    },
+    "agent_trace_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trace_event_id",
+        "agent",
+        "phase",
+        "action",
+        "status",
+        "reason",
+        "input_context_summary",
+        "output_summary"
+      ],
+      "properties": {
+        "trace_event_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.:-]{3,128}$"
+        },
+        "agent": { "$ref": "#/$defs/worker_agent" },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "S0_intake",
+            "S1_problem_analysis",
+            "S2_lit_review",
+            "S3_lit_synthesis",
+            "S4_execution_plan",
+            "S5_execution",
+            "S6_review",
+            "S7_revise",
+            "S8_pdf_generate",
+            "S9_final"
+          ]
+        },
+        "action": { "$ref": "#/$defs/action" },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "running", "ok", "revised", "blocked", "failed", "skipped"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "input_context_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "input_artifact_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artifact_ref" }
+        },
+        "output_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "output_artifact_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artifact_ref" }
+        },
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" }
+      }
     },
     "action": {
       "type": "string",

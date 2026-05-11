@@ -1,7 +1,7 @@
 {
   "mcpServers": {},
   "notes": [
-    "Add PDF-generation MCP/tool access here later.",
+    "Add HTML-rendering or static-site MCP/tool access here later if needed.",
     "No browser, spawn, or unrestricted exec tools should be configured for this role."
   ]
 }

@@ -12,12 +12,32 @@ from typing import Any
 
 
 ROLE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = ROLE_DIR.parents[1]
 DEFAULT_CONFIG = {
     "api_type": "openai",
-    "model": "openrouter/inclusionai/ring-2.6-1t:free",
-    "base_url": "https://openrouter.ai/api/v1",
-    "api_key": "${OPENROUTER_API_KEY}",
+    "model": "gpt-5.4-nano",
+    "base_url": "https://api.openai.com/v1",
+    "api_key": "${OPENAI_API_KEY}",
 }
+
+
+def _load_env_files(paths: list[Path]) -> None:
+    """Load local .env values without overriding explicit shell variables."""
+    for path in paths:
+        if not path.exists():
+            continue
+        for raw_line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
+_load_env_files([REPO_ROOT / ".env", REPO_ROOT.parent / ".env"])
 
 
 def _expand_env(value: str) -> str:
@@ -35,7 +55,6 @@ def load_llm_config(config_path: str | None = None) -> dict[str, Any]:
         [
             ROLE_DIR / "llm_config.json",
             Path("llm_config.json"),
-            Path("llm_config_openrouter.json"),
             Path("llm_config.example.json"),
         ]
     )
@@ -51,18 +70,28 @@ def load_llm_config(config_path: str | None = None) -> dict[str, Any]:
 
     if os.environ.get("EXECUTOR_LLM_BASE_URL"):
         config["base_url"] = os.environ["EXECUTOR_LLM_BASE_URL"]
+    elif os.environ.get("OPENAI_BASE_URL"):
+        config["base_url"] = os.environ["OPENAI_BASE_URL"]
     if os.environ.get("EXECUTOR_LLM_MODEL"):
         config["model"] = os.environ["EXECUTOR_LLM_MODEL"]
+    elif os.environ.get("OPENAI_MODEL"):
+        config["model"] = os.environ["OPENAI_MODEL"]
     if os.environ.get("EXECUTOR_LLM_API_KEY"):
         config["api_key"] = os.environ["EXECUTOR_LLM_API_KEY"]
-    elif os.environ.get("OPENROUTER_API_KEY"):
-        config["api_key"] = os.environ["OPENROUTER_API_KEY"]
     elif os.environ.get("OPENAI_API_KEY"):
         config["api_key"] = os.environ["OPENAI_API_KEY"]
-        if "base_url" not in config or config["base_url"] == DEFAULT_CONFIG["base_url"]:
+        if not os.environ.get("EXECUTOR_LLM_BASE_URL") and not os.environ.get("OPENAI_BASE_URL"):
             config["base_url"] = "https://api.openai.com/v1"
-        if str(config.get("model", "")).startswith("openrouter/"):
-            config["model"] = os.environ.get("EXECUTOR_LLM_MODEL", "gpt-4o-mini")
+        if str(config.get("model", "")).startswith(("openrouter/", "inclusionai/")):
+            config["model"] = os.environ.get("EXECUTOR_LLM_MODEL") or os.environ.get("OPENAI_MODEL") or DEFAULT_CONFIG["model"]
+    elif (
+        os.environ.get("OPENROUTER_API_KEY")
+        and (
+            "openrouter.ai" in str(config.get("base_url", ""))
+            or str(config.get("model", "")).startswith(("openrouter/", "inclusionai/"))
+        )
+    ):
+        config["api_key"] = os.environ["OPENROUTER_API_KEY"]
 
     api_key = config.get("api_key", "")
     if isinstance(api_key, str):
@@ -97,16 +126,23 @@ def chat_completion(
         "temperature": temperature,
         "max_tokens": max_tokens,
     }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    if "openrouter.ai" in base_url:
+        headers.update(
+            {
+                "HTTP-Referer": "https://github.com/BrianPengT/multi-agent-hackathon",
+                "X-Title": "multi-agent-hackathon executor",
+            }
+        )
+
     request = urllib.request.Request(
         f"{base_url}/chat/completions",
         data=json.dumps(payload).encode("utf-8"),
         method="POST",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/BrianPengT/multi-agent-hackathon",
-            "X-Title": "multi-agent-hackathon executor",
-        },
+        headers=headers,
     )
 
     try:

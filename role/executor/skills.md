@@ -16,7 +16,7 @@
 
 - Literature search
 - Reviewer invocation
-- PDF generation
+- Final report generation
 - Global research planning
 - External publishing
 - Directly submit-ready coursework production in `study_assistant` mode

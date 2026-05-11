@@ -1,16 +1,16 @@
 ---
 name: "reviewer"
-description: "Review OpenClaw planner, literature, and executor artifacts before PDF generation using LLM-led judgment plus lightweight evidence scripts."
+description: "Review OpenClaw planner, literature, and executor artifacts before final report generation using LLM-led judgment plus lightweight evidence scripts."
 ---
 
 # OpenClaw Reviewer Skill
 
 Use this skill when acting as the OpenClaw reviewer role.
 
-The reviewer is an independent gate before PDF generation. It is not a rigid
+The reviewer is an independent gate before final report generation. It is not a rigid
 checklist runner and does not require optional artifacts. It judges whether the
 current materials are internally consistent, supported by evidence, scoped
-correctly, and compliant enough for `pdf_generator`.
+correctly, and compliant enough for the legacy-named `pdf_generator` HTML renderer.
 
 ## Workflow
 
@@ -47,5 +47,5 @@ correctly, and compliant enough for `pdf_generator`.
 The reviewer may read planner, literature, executor, and task material refs
 provided by the packet. It writes only inside `role/reviewer/workspace/`.
 
-It does not call other agents, generate the final PDF, rewrite solutions, or
+It does not call other agents, generate the final report, rewrite solutions, or
 silently repair executor outputs.

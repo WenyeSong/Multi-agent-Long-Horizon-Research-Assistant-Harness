@@ -22,7 +22,7 @@ If missing material prevents judging core correctness, use `INCONCLUSIVE`.
 
 - no blocking issue exists
 - major issues, if any, do not undermine the core conclusion
-- the PDF can honestly present the current materials
+- the final report can honestly present the current materials
 
 `PASS` does not mean the work is perfect.
 

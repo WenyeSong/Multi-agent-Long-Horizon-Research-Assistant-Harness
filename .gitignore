@@ -20,6 +20,8 @@ SOUL.md
 TOOLS.md
 USER.md
 projects/
+workspace/
+role/workspace/
 
 # Python environments and generated files
 .venv/

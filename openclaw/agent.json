@@ -2,16 +2,14 @@
   "id": "main",
   "name": "OpenClaw Main Planner",
   "kind": "openclaw_agent",
-  "workspace": "/home/akame/mphildis/events/multi-agent-hackathon",
+  "workspace": ".",
   "sandbox": {
-    "mode": "all",
-    "workspaceAccess": "rw",
-    "workspaceRoot": "/home/akame/mphildis/events/multi-agent-hackathon"
+    "mode": "off"
   },
   "llm_config": {
     "active": "llm_config.json",
-    "source": "llm_config_openrouter.json",
-    "provider": "openrouter"
+    "source": "llm_config.example.json",
+    "provider": "openai"
   },
   "state_schema": "schemas/state.schema.json",
   "review_policy": {
@@ -34,8 +32,13 @@
   "notes": [
     "This single OpenClaw agent is both main and research planner.",
     "It receives user input, maintains planner state, employs preexisting workers, and returns final results.",
-    "It must fail fast if the repository workspace is not visible inside the sandbox.",
-    "It must never scaffold replacement roles or schemas in /tmp or /workspace.",
+    "Sandbox mode is currently off; run OpenClaw from the repository root.",
+    "It must fail fast if the repository workspace is not visible at the current working directory.",
+    "It must never scaffold replacement roles or schemas in /tmp or any ad hoc workspace.",
+    "It must make worker role employment visible in CLI replies via Agent Trace lines.",
+    "Plain do-research requests must run literature_reviewer, executor, reviewer, and pdf_generator unless explicitly source-only.",
+    "The default deliverable is a reviewed HTML report; human feedback should shape that report.",
+    "Use sessions_yield for interactive CLI progress before long worker phases when available.",
     "It must not access the internet directly for research; literature_reviewer owns internet-backed research.",
     "It may use GitHub operational tools for repository lifecycle management.",
     "It must cap reviewer loops at five rounds and require an explicit forced PASS on the fifth round."

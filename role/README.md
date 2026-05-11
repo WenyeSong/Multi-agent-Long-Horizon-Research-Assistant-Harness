@@ -8,7 +8,7 @@ Included executable worker roles:
 - `literature_reviewer`
 - `executor`
 - `reviewer`
-- `pdf_generator`
+- `pdf_generator` (legacy name; current output is HTML)
 
 There is no separate `research_planner` worker. The current OpenClaw agent is
 both main and planner, as described in `openclaw/`.

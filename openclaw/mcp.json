@@ -10,6 +10,7 @@
       "github_repo_update",
       "github_issue",
       "github_pull_request",
+      "sessions_yield",
       "sessions_spawn",
       "sessions_history",
       "session_status"
@@ -48,8 +49,12 @@
   },
   "notes": [
     "The OpenClaw main/planner must not have direct internet access.",
-    "The planner sandbox must mount /home/akame/mphildis/events/multi-agent-hackathon with rw workspace access.",
-    "If the repository workspace is not visible, the planner must stop instead of creating replacement files elsewhere.",
+    "Sandbox mode is off; run OpenClaw from the repository root.",
+    "If the repository workspace is not visible from the current working directory, the planner must stop instead of creating replacement files elsewhere.",
+    "Worker role employment must be visible in CLI replies through Agent Trace lines.",
+    "Plain do-research requests must employ literature_reviewer, executor, reviewer, and pdf_generator unless explicitly source-only.",
+    "The default deliverable is a reviewed HTML report; human feedback should shape that report.",
+    "Use sessions_yield for interactive CLI progress before long worker phases when available.",
     "Any internet, paper, citation, DOI, arXiv, or source-verification need must be delegated to role/literature_reviewer.",
     "GitHub access is allowed only for repository lifecycle operations, not general web research.",
     "When GitHub sync is enabled, repository state should follow planner state and user instructions.",

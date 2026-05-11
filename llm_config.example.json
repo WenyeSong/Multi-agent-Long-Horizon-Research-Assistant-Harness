@@ -1,7 +1,7 @@
 {
   "api_type": "openai",
-  "model": "inclusionai/ring-2.6-1t:free",
-  "base_url": "https://openrouter.ai/api/v1",
-  "api_key": "${OPENROUTER_API_KEY}",
+  "model": "gpt-5.4-nano",
+  "base_url": "https://api.openai.com/v1",
+  "api_key": "${OPENAI_API_KEY}",
   "price": [0, 0]
 }
