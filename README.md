@@ -1,26 +1,10 @@
-# Multi-Agent Long-Horizon Research Assistant Harness
+# Multi-Agent Hackathon
 
 Workspace for a planner-centered OpenClaw multi-agent research assistant.
 
 This repo is currently at the schema-first stage. The five JSON contracts in
 `schemas/` define the planner state and worker outputs before any agent prompts
 or OpenClaw runtime config are added.
-
-## Orchestration & Models
-
-**Orchestrator:** [OpenClaw](https://openclaw.dev) — acts as both the user-facing
-agent and the research planner, coordinating all worker roles.
-
-| Role | Model | Notes |
-|------|-------|-------|
-| Planner (OpenClaw main) | `openai/gpt-5.4-nano` | Default; configurable via `llm_config.json` |
-| literature\_reviewer | `openai/gpt-5.4-nano` | Inherits planner config |
-| executor | `openai/gpt-5.4-nano` | Inherits planner config |
-| reviewer | `openai/gpt-5.4-nano` | Inherits planner config |
-| pdf\_generator | `openai/gpt-5.4-nano` | Inherits planner config |
-
-Any OpenAI-compatible model can be substituted by editing `llm_config.json` and
-running `openclaw models set <provider>/<model>`.
 
 ## Repository Hygiene
 
