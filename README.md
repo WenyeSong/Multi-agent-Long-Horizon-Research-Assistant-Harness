@@ -1,5 +1,7 @@
 # Multi-Agent Hackathon
 
+![OpenClaw Long-Horizon Research Harness Architecture](docs/architecture.png)
+
 Workspace for a planner-centered OpenClaw multi-agent research assistant.
 
 This repo is currently at the schema-first stage. The five JSON contracts in
