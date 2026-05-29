@@ -1,4 +1,5 @@
-# Multi-Agent Hackathon
+# Multi-Agent Hackathon：Long-Horizon-Research-Assistant-Harness
+
 
 ![OpenClaw Long-Horizon Research Harness Architecture](docs/architecture.png)
 
